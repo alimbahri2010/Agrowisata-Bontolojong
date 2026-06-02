@@ -1,14 +1,23 @@
 import React, { useState } from "react";
-import { Trees, Send, Instagram, Facebook, Youtube, ShieldAlert } from "lucide-react";
+import { Trees, Send, Instagram, Facebook, Youtube, ShieldAlert, Mountain, Compass, Sun, Leaf } from "lucide-react";
 
 interface FooterProps {
   logoName: string;
   tagline: string;
   setView: (v: "landing" | "booking" | "login" | "dashboard") => void;
   scrollToSection: (id: string) => void;
+  logoImageUrl?: string;
+  logoShape?: string;
 }
 
-export default function Footer({ logoName, tagline, setView, scrollToSection }: FooterProps) {
+export default function Footer({
+  logoName,
+  tagline,
+  setView,
+  scrollToSection,
+  logoImageUrl = "",
+  logoShape = "mountain"
+}: FooterProps) {
   const [email, setEmail] = useState("");
   const [subSuccess, setSubSuccess] = useState(false);
 
@@ -46,16 +55,46 @@ export default function Footer({ logoName, tagline, setView, scrollToSection }: 
           
           {/* Logo Brand columns */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="flex items-center space-x-2.5 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-              <div className="p-2 bg-gradient-to-br from-[#D4A017] to-[#F28C28] rounded-xl text-white shadow-xl">
-                <Trees className="w-6 h-6" />
+            <div
+              onClick={() => {
+                setView("landing");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="flex items-center space-x-2.5 cursor-pointer group"
+            >
+              <div className="w-10 h-10 bg-[#D4A017] rounded flex items-center justify-center shadow-md group-hover:scale-105 transition-transform overflow-hidden">
+                {logoImageUrl ? (
+                  <img
+                    src={logoImageUrl}
+                    alt="Logo"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  (() => {
+                    const className = "w-5 h-5 text-white";
+                    switch (logoShape) {
+                      case "tree":
+                        return <Trees className={className} />;
+                      case "compass":
+                        return <Compass className={className} />;
+                      case "sun":
+                        return <Sun className={className} />;
+                      case "leaf":
+                        return <Leaf className={className} />;
+                      case "mountain":
+                      default:
+                        return <Mountain className={className} />;
+                    }
+                  })()
+                )}
               </div>
-              <div>
-                <span className="font-sans font-black text-xl tracking-wider block leading-none text-white uppercase">
-                  AGROWISATA BONTOLOJONG
+              <div className="text-left font-sans">
+                <span className="font-sans font-bold text-sm tracking-tight uppercase block leading-none text-white transition-colors duration-200">
+                  {logoName}
                 </span>
-                <span className="font-mono text-[9px] uppercase tracking-widest text-[#FFF8EF]/60 block mt-1">
-                  AGROWISATA • KAWASAN HIJAU
+                <span className="font-mono text-[8px] uppercase tracking-widest block mt-1 text-[#FFF8EF]/60 transition-colors duration-200">
+                  {tagline}
                 </span>
               </div>
             </div>

@@ -262,6 +262,8 @@ export default function App() {
             <Footer
               logoName={settings.logoName}
               tagline={settings.tagline}
+              logoImageUrl={settings.logoImageUrl}
+              logoShape={settings.logoShape}
               setView={(v) => {
                 setView(v);
                 window.scrollTo({ top: 0 });

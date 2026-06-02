@@ -169,6 +169,48 @@ export default function AdminDashboard({
     }
   };
 
+  // Hero background file upload states & handlers
+  const [heroBgUploadDragActive, setHeroBgUploadDragActive] = useState(false);
+
+  const handleHeroBgFile = (file: File) => {
+    if (!file || !file.type.startsWith("image/")) {
+      alert("Format berkas harus berupa gambar (PNG, JPG, SVG, dll).");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result && typeof e.target.result === "string") {
+        setSettings({ ...settings, heroBackgroundUrl: e.target.result });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleHeroBgDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setHeroBgUploadDragActive(true);
+    } else if (e.type === "dragleave") {
+      setHeroBgUploadDragActive(false);
+    }
+  };
+
+  const handleHeroBgDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setHeroBgUploadDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleHeroBgFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleHeroBgFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleHeroBgFile(e.target.files[0]);
+    }
+  };
+
   // Create Form States
   const [newDest, setNewDest] = useState<Partial<Destination>>({
     title: "",
@@ -1827,14 +1869,75 @@ export default function AdminDashboard({
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">URL Foto Background Hero</label>
-                      <input
-                        type="text"
-                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-mono"
-                        value={settings.heroBackgroundUrl || ""}
-                        onChange={(e) => setSettings({ ...settings, heroBackgroundUrl: e.target.value })}
-                      />
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Unggah Foto Background Hero</label>
+                      
+                      {/* Drag & Drop Area conforming to Usability Patterns */}
+                      <div
+                        onDragEnter={handleHeroBgDrag}
+                        onDragOver={handleHeroBgDrag}
+                        onDragLeave={handleHeroBgDrag}
+                        onDrop={handleHeroBgDrop}
+                        onClick={() => document.getElementById("hero-bg-file-uploader")?.click()}
+                        className={`relative border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-[110px] ${
+                          heroBgUploadDragActive
+                            ? "border-orange-500 bg-orange-50/50"
+                            : settings.heroBackgroundUrl && settings.heroBackgroundUrl.startsWith("data:")
+                              ? "border-emerald-300 bg-emerald-50/10 hover:bg-emerald-50/20"
+                              : "border-slate-300 hover:border-orange-400 bg-slate-50/50 hover:bg-slate-50"
+                        }`}
+                      >
+                        <input
+                          type="file"
+                          id="hero-bg-file-uploader"
+                          accept="image/*"
+                          onChange={handleHeroBgFileChange}
+                          className="hidden"
+                        />
+
+                        {settings.heroBackgroundUrl && settings.heroBackgroundUrl.startsWith("data:") ? (
+                          <div className="space-y-1.5 w-full">
+                            <div className="flex items-center justify-center space-x-2">
+                              <div className="w-12 h-8 rounded border border-emerald-200 overflow-hidden bg-white shadow-sm flex items-center justify-center shrink-0">
+                                <img
+                                  src={settings.heroBackgroundUrl}
+                                  alt="Uploaded background"
+                                  referrerPolicy="no-referrer"
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="text-left truncate max-w-[200px]">
+                                <span className="block text-[9px] font-bold text-emerald-800 uppercase tracking-wider">✔ BACKGROUND TERUNGGAH</span>
+                                <span className="block text-[8px] font-mono text-slate-405 truncate">
+                                  Sumber Berkas Foto Lokal (Base64)
+                                </span>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSettings({ ...settings, heroBackgroundUrl: "" });
+                              }}
+                              className="mt-1 px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-mono text-[8px] font-bold uppercase tracking-wider rounded transition-colors cursor-pointer"
+                            >
+                              Hapus / Ganti Background
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <Upload className={`w-5 h-5 mb-1 ${heroBgUploadDragActive ? "text-orange-500" : "text-slate-400"}`} />
+                            <span className="block text-[10px] text-slate-700 font-sans font-bold">
+                              {heroBgUploadDragActive ? "Lepaskan file sekarang!" : "Tarik & Lepas Gambar Background"}
+                            </span>
+                            <span className="block text-[8px] text-slate-450 font-sans mt-0.5">
+                              Atau klik manual untuk memilih berkas foto Anda
+                            </span>
+                          </>
+                        )}
+                      </div>
+
+
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
