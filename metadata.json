@@ -1,0 +1,6 @@
+{
+  "name": "Agrowisata Bontolojong",
+  "description": "Jelajahi ekowisata premium, jalur pendakian, spot petualangan gunung, serta portal pemesanan tiket interaktif dan panel admin untuk Agrowisata Bontolojong.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
