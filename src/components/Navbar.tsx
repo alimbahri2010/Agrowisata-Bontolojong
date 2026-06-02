@@ -83,7 +83,7 @@ export default function Navbar({
           }}
           className="flex items-center space-x-2.5 cursor-pointer group"
         >
-          <div className="w-10 h-10 bg-[#D4A017] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform overflow-hidden">
+          <div className="w-10 h-10 bg-[#D4A017] rounded flex items-center justify-center shadow-md group-hover:scale-105 transition-transform overflow-hidden">
             {logoImageUrl ? (
               <img
                 src={logoImageUrl}

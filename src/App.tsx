@@ -24,7 +24,12 @@ import {
   initialTestimonials,
   initialStaff,
   initialWeather,
-  initialSystemSettings
+  initialSystemSettings,
+  initialSopGears,
+  initialSopGeneralRules,
+  initialSopWasteRules,
+  initialSopEthicsRules,
+  initialSopPenalties
 } from "./data";
 import { Destination, HikingTrail, Booking, TrailEvent, GalleryMedia, Testimonial, StaffMember, WeatherInfo, SystemSettings } from "./types";
 
@@ -43,6 +48,13 @@ export default function App() {
   const [staff, setStaff] = useState<StaffMember[]>(initialStaff);
   const [weather, setWeather] = useState<WeatherInfo>(initialWeather);
   const [settings, setSettings] = useState<SystemSettings>(initialSystemSettings);
+
+  // SOP States
+  const [sopGears, setSopGears] = useState<any[]>(initialSopGears);
+  const [sopGeneralRules, setSopGeneralRules] = useState<any[]>(initialSopGeneralRules);
+  const [sopWasteRules, setSopWasteRules] = useState<any[]>(initialSopWasteRules);
+  const [sopEthicsRules, setSopEthicsRules] = useState<any[]>(initialSopEthicsRules);
+  const [sopPenalties, setSopPenalties] = useState<any[]>(initialSopPenalties);
 
   // Selector hooks for wizard prefill
   const [preSelectedName, setPreSelectedName] = useState<string>("");
@@ -199,10 +211,11 @@ export default function App() {
                 window.scrollTo({ top: 0 });
               }}
               scrollToSection={scrollToSection}
+              settings={settings}
             />
 
             {/* About story section */}
-            <About />
+            <About settings={settings} />
 
             {/* Nature spots and destinations */}
             <Destinations
@@ -218,7 +231,14 @@ export default function App() {
             />
 
             {/* Standard Operating Procedure (SOP) Section representing the rules info-graphic */}
-            <Sop />
+            <Sop
+              gears={sopGears}
+              generalRules={sopGeneralRules}
+              wasteRules={sopWasteRules}
+              ethicsRules={sopEthicsRules}
+              penalties={sopPenalties}
+              settings={settings}
+            />
 
             {/* Nature visual grids */}
             <Gallery galleryItems={gallery} />
@@ -285,6 +305,18 @@ export default function App() {
             setWeather={setWeather}
             settings={settings}
             setSettings={setSettings}
+            testimonials={testimonials}
+            setTestimonials={setTestimonials}
+            sopGears={sopGears}
+            setSopGears={setSopGears}
+            sopGeneralRules={sopGeneralRules}
+            setSopGeneralRules={setSopGeneralRules}
+            sopWasteRules={sopWasteRules}
+            setSopWasteRules={setSopWasteRules}
+            sopEthicsRules={sopEthicsRules}
+            setSopEthicsRules={setSopEthicsRules}
+            sopPenalties={sopPenalties}
+            setSopPenalties={setSopPenalties}
             onLogout={handleLogout}
             adminEmail={adminSession.email}
             adminRole={adminSession.role}

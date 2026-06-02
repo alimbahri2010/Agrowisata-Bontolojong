@@ -1,16 +1,23 @@
 import React from "react";
 import { motion } from "motion/react";
 import { ArrowDown, Mountain, Map } from "lucide-react";
+import { SystemSettings } from "../types";
 
 interface HeroProps {
   logoName: string;
   tagline: string;
   setView: (view: "landing" | "booking" | "login" | "dashboard") => void;
   scrollToSection: (id: string) => void;
-  openAdminDirectly?: () => void;
+  settings: SystemSettings;
 }
 
-export default function Hero({ logoName, tagline, setView, scrollToSection }: HeroProps) {
+export default function Hero({ logoName, tagline, setView, scrollToSection, settings }: HeroProps) {
+  const bgUrl = settings.heroBackgroundUrl || "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80";
+  const estText = settings.heroEstText || "EST. 2024 • SULAWESI SELATAN";
+  const heightMetric = settings.heroHeightMetric || "1.450m";
+  const trailsMetric = settings.heroTrailsMetric || "3+ Jalur";
+  const conservationMetric = settings.heroConservationMetric || "100%";
+
   return (
     <section
       id="home"
@@ -19,8 +26,9 @@ export default function Hero({ logoName, tagline, setView, scrollToSection }: He
       {/* Immersive Parallax & Animated Background Layers */}
       <div className="absolute inset-0 z-0">
         <img
-          src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80"
+          src={bgUrl}
           alt="Bontolojong Mountains Backdrop"
+          referrerPolicy="no-referrer"
           className="w-full h-full object-cover object-bottom filter brightness-75 select-none"
         />
         {/* Soft Warm Sunset Overlay */}
@@ -44,7 +52,7 @@ export default function Hero({ logoName, tagline, setView, scrollToSection }: He
           <div className="flex items-center gap-3 mb-2 justify-center">
             <div className="h-[1.5px] w-10 bg-mustard" />
             <span className="text-mustard text-xs sm:text-sm font-bold tracking-[0.3em] uppercase">
-              EST. 2024 • SULAWESI SELATAN
+              {estText}
             </span>
             <div className="h-[1.5px] w-10 bg-mustard" />
           </div>
@@ -110,15 +118,15 @@ export default function Hero({ logoName, tagline, setView, scrollToSection }: He
           className="mt-16 max-w-3xl mx-auto grid grid-cols-3 gap-4 p-4 rounded-2xl bg-slate-950/40 backdrop-blur-lg border border-white/10 text-white select-none text-center"
         >
           <div>
-            <span className="block text-xl md:text-2xl font-bold text-mustard">1.450m</span>
+            <span className="block text-xl md:text-2xl font-bold text-mustard">{heightMetric}</span>
             <span className="block text-[10px] uppercase font-mono tracking-wider text-slate-300">Tinggi Puncak</span>
           </div>
           <div className="border-x border-white/10">
-            <span className="block text-xl md:text-2xl font-bold text-tangerine">3+ Jalur</span>
+            <span className="block text-xl md:text-2xl font-bold text-tangerine">{trailsMetric}</span>
             <span className="block text-[10px] uppercase font-mono tracking-wider text-slate-300">Rute Sesuai Pilihan</span>
           </div>
           <div>
-            <span className="block text-xl md:text-2xl font-bold text-green">100%</span>
+            <span className="block text-xl md:text-2xl font-bold text-green">{conservationMetric}</span>
             <span className="block text-[10px] uppercase font-mono tracking-wider text-slate-300">Konservasi Alami</span>
           </div>
         </motion.div>

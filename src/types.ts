@@ -98,4 +98,20 @@ export interface SystemSettings {
   baseCampingTicketPrice: number;
   logoImageUrl?: string;
   logoShape?: string;
+  // Beranda / Hero settings
+  heroEstText?: string;
+  heroBackgroundUrl?: string;
+  heroHeightMetric?: string;
+  heroTrailsMetric?: string;
+  heroConservationMetric?: string;
+  // Tentang Kami / About settings
+  aboutImageUrl?: string;
+  aboutHistoryTitle?: string;
+  aboutHistoryDesc1?: string;
+  aboutHistoryDesc2?: string;
+  aboutMissionText?: string;
+  // SOP general hours info
+  sopSimaksiHours?: string;
+  sopMaxAscentHours?: string;
+  sopCheckoutDesc?: string;
 }

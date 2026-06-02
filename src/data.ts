@@ -341,5 +341,214 @@ export const initialSystemSettings: SystemSettings = {
   baseHikingTicketPrice: 10,
   baseCampingTicketPrice: 15,
   logoImageUrl: "",
-  logoShape: "mountain"
+  logoShape: "mountain",
+  // Beranda Settings
+  heroEstText: "EST. 2024 • SULAWESI SELATAN",
+  heroBackgroundUrl: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80",
+  heroHeightMetric: "1.450m",
+  heroTrailsMetric: "3+ Jalur",
+  heroConservationMetric: "100%",
+  // Tentang Kami Settings
+  aboutImageUrl: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+  aboutHistoryTitle: "Kisah Agrowisata Bontolojong",
+  aboutHistoryDesc1: "Terletak di punggungan bukit pertanian dataran tinggi Gowa, **Agrowisata Bontolojong** memadukan petualangan pegunungan yang asri dengan warisan budidaya hortikultura lokal. Inisiatif berbasis pemberdayaan masyarakat ini bertekad melindungi kelestarian hutan asli sekaligus menawarkan wisata ramah lingkungan.",
+  aboutHistoryDesc2: "Ketika Anda menyusuri jalur pendakian atau berkemah di bawah konstelasi bintang, kunjungan Anda langsung mendukung mata pencaharian para ranger pelindung hutan, petani buah lokal, dan masyarakat setempat. Setiap jejak Anda adalah langkah pelestarian bumi.",
+  aboutMissionText: "Misi Konservasi Alam: Menanam 10.000 bibit pohon mahoni dan teh di sepanjang punggungan bukit penyangga dalam tiga tahun ke depan, sembari mengedukasi kebijakan zero-waste bagi semua pendaki.",
+  // SOP Info
+  sopSimaksiHours: "07.00 - 17.30 WITA",
+  sopMaxAscentHours: "15.00 WITA",
+  sopCheckoutDesc: "Wajib Check-Out dan melapor kembali setelah turun dari gunung guna validasi sampah & pendata keselamatan."
 };
+
+export const initialSopGears = [
+  {
+    id: "gear-1",
+    name: "Tas Carrier/Daypack",
+    desc: "Tas pendakian yang ergonomis untuk membawa logistik secara aman.",
+    tag: "Wajib"
+  },
+  {
+    id: "gear-2",
+    name: "Jaket Pelindung Dingin",
+    desc: "Melindungi tubuh dari suhu beku ekstrem dataran tinggi Bontolojong.",
+    tag: "Wajib"
+  },
+  {
+    id: "gear-3",
+    name: "Sepatu Gunung",
+    desc: "Sepatu dengan grip kuat di medan berbatu, licin, dan berlumpur.",
+    tag: "Sangat Disarankan"
+  },
+  {
+    id: "gear-4",
+    name: "Jas Hujan",
+    desc: "Sedia payung sebelum hujan; cuaca pegunungan dapat berubah sangat cepat.",
+    tag: "Wajib"
+  },
+  {
+    id: "gear-5",
+    name: "Senter/Headlamp",
+    desc: "Penerangan utama saat mendaki malam hari atau melakukan sunrise trek.",
+    tag: "Wajib"
+  },
+  {
+    id: "gear-6",
+    name: "Air Minum & Logistik",
+    desc: "Sediaan makanan berkalori tinggi & air yang cukup selama ekspedisi.",
+    tag: "Cukup & Wajib"
+  },
+  {
+    id: "gear-7",
+    name: "Obat-obatan Pribadi",
+    desc: "Peralatan medis pribadi untuk pertolongan pertama mandiri.",
+    tag: "Pribadi"
+  },
+  {
+    id: "gear-8",
+    name: "Kantong Sampah",
+    desc: "Wadah penampungan sampah bawaan pribadi untuk dibawa turun kembali.",
+    tag: "MUTLAK WAJIB"
+  },
+  {
+    id: "gear-9",
+    name: "Flysheet / Shelter",
+    desc: "Lembaran kanopi pendukung pelindung angin kencang dan rembesan air.",
+    tag: "Sangat Dianjurkan"
+  },
+  {
+    id: "gear-10",
+    name: "Emergency Blanket",
+    desc: "Selimut foil thermal penahan panas tubuh agar terhindar dari hipotermia.",
+    tag: "Hipotermia Guard"
+  }
+];
+
+export const initialSopGeneralRules = [
+  {
+    id: "rule-1",
+    num: "01",
+    title: "Wajib Registrasi Sebelum Pendakian",
+    desc: "Setiap pendaki wajib mendaftarkan diri secara sah dan resmi melalui loket gerbang masuk atau sistem online Agrowisata Bontolojong."
+  },
+  {
+    id: "rule-2",
+    num: "02",
+    title: "Mengisi Data Lengkap Pengunjung",
+    desc: "Memberikan informasi identitas riil serta mencantumkan nomor kontak darurat keluarga terdekat yang dapat dihubungi sewaktu-waktu."
+  },
+  {
+    id: "rule-3",
+    num: "03",
+    title: "Sehat Jasmani dan Rohani",
+    desc: "Pendaki harus dalam kondisi prima, memiliki stamina yang memadai, dan tidak memiliki riwayat medis berat yang berbahaya di ketinggian."
+  },
+  {
+    id: "rule-4",
+    num: "04",
+    title: "Minimal Rombongan 2 Orang",
+    desc: "Sangat tidak disarankan melakukan pendakian solo (solo hiking) demi menjaga keselamatan dan saling memantau kondisi di lapangan."
+  },
+  {
+    id: "rule-5",
+    num: "05",
+    title: "Wajib Mengikuti Safety Briefing",
+    desc: "Mendengarkan arahan dari petugas pemandu wisata / ranger mengenai kondisi jalur terkini, cuaca, serta aturan konservasi alam."
+  },
+  {
+    id: "rule-6",
+    num: "06",
+    title: "Wajib Check-In & Check-Out",
+    desc: "Melakukan proses absensi masuk saat mendaki dan wajib melapor kembali saat sudah turun guna memantau jumlah pendaki aktif."
+  }
+];
+
+export const initialSopWasteRules = [
+  {
+    id: "waste-1",
+    title: "Membawa Turun Sampah Sendiri",
+    desc: "Semua logistik makanan/minuman berkemah yang berpotensi menyisakan sampah wajib ditampung kembali ke dalam trash bag milik Anda.",
+    action: "Wajib Bawa Turun"
+  },
+  {
+    id: "waste-2",
+    title: "Dilarang Meninggalkan Sampah di Jalur",
+    desc: "Sama sekali tidak diperbolehkan membuang, mengubur, atau menyembunyikan sampah plastik di punggungan maupun di puncak gunung.",
+    action: "Nol Toleransi Plastik"
+  },
+  {
+    id: "waste-3",
+    title: "Inspeksi Sampah Check-Out",
+    desc: "Petugas pos loket bawah akan mencocokkan jumlah sampah bawaan Anda dengan estimasi daftar logistik Anda saat pendaftaran pertama.",
+    action: "Pembersihan Terverifikasi"
+  },
+  {
+    id: "waste-4",
+    title: "Prinsip Utama Pendaki Lestari",
+    desc: "Memegang teguh filosofi: 'Apa yang dibawa naik ke atas, harus dan wajib hukumnya untuk dibawa turun kembali ke bawah'.",
+    action: "Golden Rule"
+  }
+];
+
+export const initialSopEthicsRules = [
+  {
+    id: "ethics-1",
+    title: "Dilarang Merusak Tanaman & Fasilitas",
+    desc: "Dilarang mematahkan ranting, memetik bunga liar, melakukan corat-coret (vandalisme), atau merusak pos-pos peristirahatan umum.",
+    iconName: "Ban"
+  },
+  {
+    id: "ethics-2",
+    title: "Dilarang Membuat Api Unggun Tanpa Izin",
+    desc: "Api unggun liar berisiko memicu kebakaran kawasan hutan pinus kering. Wajib mematuhi anjuran pembuatan api ramah lingkungan.",
+    iconName: "Flame"
+  },
+  {
+    id: "ethics-3",
+    title: "Dilarang Membawa Minuman Keras & Narkoba",
+    desc: "Minuman beralkohol membahayakan keselamatan diri sendiri karena merusak kesadaran, serta mengganggu lingkungan sosial sesama pendaki.",
+    iconName: "Ban"
+  },
+  {
+    id: "ethics-4",
+    title: "Wajib Menjaga Etika & Ketertiban",
+    desc: "Menghormati kearifan lokal warga sekitar, berbicara sopan, tidak menyetel musik kencang (speaker bluetooth) yang merusak ketenangan hutan.",
+    iconName: "HeartHandshake"
+  },
+  {
+    id: "ethics-5",
+    title: "Keselamatan di Atas Puncak",
+    desc: "Ingatlah bahwa kepulangan Anda dengan selamat di rumah berkumpul bersama keluarga jauh lebih bernilai dari sekadar pencapaian puncak gunung.",
+    iconName: "ShieldAlert"
+  }
+];
+
+export const initialSopPenalties = [
+  {
+    id: "penalty-1",
+    level: "Tingkat I",
+    name: "Teguran Tertulis / Lisan",
+    desc: "Diberikan kepada pendaki yang melakukan pelanggaran minor awal seputar kelalaian etika ringan.",
+    color: "border-amber-200 bg-amber-50/50 text-amber-900"
+  },
+  {
+    id: "penalty-2",
+    level: "Tingkat II",
+    name: "Larangan Melanjutkan Pendakian",
+    desc: "Bagi rombongan yang membawa perlengkapan kurang kramah lingkungan atau terbukti melalaikan aspek keselamatan keselamatan dasar.",
+    color: "border-orange-200 bg-orange-50/50 text-orange-900"
+  },
+  {
+    id: "penalty-3",
+    level: "Tingkat III",
+    name: "Blacklist Sementara / Permanen",
+    desc: "Berlaku keras untuk pendaki yang terbukti membuang sampah sembarangan di gunung, merusak fasilitas agrowisata secara sengaja.",
+    color: "border-rose-200 bg-rose-50/50 text-rose-900"
+  },
+  {
+    id: "penalty-4",
+    level: "Tingkat IV",
+    name: "Sanksi Kebijakan Pengelola & Hukum",
+    desc: "Tindakan hukum formal atau denda administratif berat demi memulihkan kerusakan ekosistem agrowisata Bontolojong.",
+    color: "border-red-300 bg-red-50/70 text-red-950 font-bold"
+  }
+];

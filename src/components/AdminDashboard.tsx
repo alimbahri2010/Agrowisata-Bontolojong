@@ -59,6 +59,18 @@ interface AdminDashboardProps {
   setWeather: React.Dispatch<React.SetStateAction<WeatherInfo>>;
   settings: SystemSettings;
   setSettings: React.Dispatch<React.SetStateAction<SystemSettings>>;
+  testimonials: Testimonial[];
+  setTestimonials: React.Dispatch<React.SetStateAction<Testimonial[]>>;
+  sopGears: any[];
+  setSopGears: React.Dispatch<React.SetStateAction<any[]>>;
+  sopGeneralRules: any[];
+  setSopGeneralRules: React.Dispatch<React.SetStateAction<any[]>>;
+  sopWasteRules: any[];
+  setSopWasteRules: React.Dispatch<React.SetStateAction<any[]>>;
+  sopEthicsRules: any[];
+  setSopEthicsRules: React.Dispatch<React.SetStateAction<any[]>>;
+  sopPenalties: any[];
+  setSopPenalties: React.Dispatch<React.SetStateAction<any[]>>;
   onLogout: () => void;
   adminEmail: string;
   adminRole: string;
@@ -81,12 +93,24 @@ export default function AdminDashboard({
   setWeather,
   settings,
   setSettings,
+  testimonials,
+  setTestimonials,
+  sopGears,
+  setSopGears,
+  sopGeneralRules,
+  setSopGeneralRules,
+  sopWasteRules,
+  setSopWasteRules,
+  sopEthicsRules,
+  setSopEthicsRules,
+  sopPenalties,
+  setSopPenalties,
   onLogout,
   adminEmail,
   adminRole
 }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<
-    "overview" | "destinations" | "trails" | "bookings" | "events" | "gallery" | "visitors" | "analytics" | "staff" | "settings"
+    "overview" | "destinations" | "trails" | "bookings" | "events" | "gallery" | "visitors" | "analytics" | "staff" | "settings" | "edit-beranda" | "edit-tentang-kami" | "edit-testimoni" | "edit-sop"
   >("overview");
 
   // Local utility states
@@ -313,6 +337,51 @@ export default function AdminDashboard({
     });
   };
 
+  // Local state for Testimonial editor
+  const [newTestimonial, setNewTestimonial] = useState<Partial<Testimonial>>({
+    name: "",
+    role: "Pengunjung",
+    comment: "",
+    rating: 5,
+    date: new Date().toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" }),
+    avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"
+  });
+
+  // Local states for SOP managers
+  const [newSopGear, setNewSopGear] = useState({
+    name: "",
+    desc: "",
+    tag: "Wajib"
+  });
+
+  const [newSopGeneralRule, setNewSopGeneralRule] = useState({
+    num: "",
+    title: "",
+    desc: ""
+  });
+
+  const [newSopWasteRule, setNewSopWasteRule] = useState({
+    title: "",
+    desc: "",
+    action: "Wajib Bawa Turun"
+  });
+
+  const [newSopEthicsRule, setNewSopEthicsRule] = useState({
+    title: "",
+    desc: "",
+    iconName: "Ban"
+  });
+
+  const [newSopPenalty, setNewSopPenalty] = useState({
+    level: "Tingkat I",
+    name: "",
+    desc: "",
+    color: "border-amber-200 bg-amber-50/50 text-amber-900"
+  });
+
+  // Active sub-section for SOP management panel
+  const [sopEditorSubSection, setSopEditorSubSection] = useState<"hours" | "gears" | "general" | "waste" | "ethics" | "penalties">("hours");
+
   const handleDeleteDest = (id: string) => {
     setDestinations((prev) => prev.filter((d) => d.id !== id));
   };
@@ -368,18 +437,49 @@ export default function AdminDashboard({
           </button>
 
           {/* Navigation links stack matches layout instructions */}
-          <nav className="p-4 space-y-1.5" id="sidebar-navigator-list">
+          <nav className="p-4 space-y-1.5 max-h-[75vh] overflow-y-auto" id="sidebar-navigator-list">
+            {!sidebarCollapsed && (
+              <span className="block px-2.5 text-[8px] font-mono text-slate-400 font-extrabold tracking-widest uppercase mb-1">Operasional</span>
+            )}
             {[
-              { id: "overview", label: "Dasbor", icon: <LayoutDashboard className="w-4.5 h-4.5" /> },
-              { id: "destinations", label: "Destinasi", icon: <Compass className="w-4.5 h-4.5" /> },
+              { id: "overview", label: "Dasbor Utama", icon: <LayoutDashboard className="w-4.5 h-4.5" /> },
+              { id: "destinations", label: "Destinasi Spot", icon: <Compass className="w-4.5 h-4.5" /> },
               { id: "trails", label: "Jalur Pilihan", icon: <Map className="w-4.5 h-4.5" /> },
-              { id: "bookings", label: "Pemesanan", icon: <CalendarDays className="w-4.5 h-4.5" /> },
-              { id: "events", label: "Acara", icon: <Plus className="w-4.5 h-4.5" /> },
+              { id: "bookings", label: "Pemesanan Tiket", icon: <CalendarDays className="w-4.5 h-4.5" /> },
+              { id: "events", label: "Acara & Relawan", icon: <Plus className="w-4.5 h-4.5" /> },
               { id: "gallery", label: "Galeri Album", icon: <Image className="w-4.5 h-4.5" /> },
               { id: "visitors", label: "Pengunjung", icon: <Users className="w-4.5 h-4.5" /> },
               { id: "analytics", label: "Analisis", icon: <TrendingUp className="w-4.5 h-4.5" /> },
               { id: "staff", label: "Daftar Staf", icon: <Briefcase className="w-4.5 h-4.5" /> },
-              { id: "settings", label: "Faktor Pengaturan", icon: <Sliders className="w-4.5 h-4.5" /> }
+              { id: "settings", label: "Parameter Umum", icon: <Sliders className="w-4.5 h-4.5" /> }
+            ].map((tab) => {
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`w-full text-left p-2.5 rounded-xl text-xs font-sans font-semibold flex items-center space-x-3 transition-all cursor-pointer ${
+                    active
+                      ? "bg-[#D4A017] text-slate-950 shadow-md scale-[1.02]"
+                      : "text-slate-300 hover:bg-slate-800"
+                  }`}
+                >
+                  <span className="shrink-0">{tab.icon}</span>
+                  {!sidebarCollapsed && <span className="truncate">{tab.label}</span>}
+                </button>
+              );
+            })}
+
+            <div className="pt-4 border-t border-slate-700/40 my-2" />
+
+            {!sidebarCollapsed && (
+              <span className="block px-2.5 text-[8px] font-mono text-[#D4A017] font-extrabold tracking-widest uppercase mb-1">Editor Halaman</span>
+            )}
+            {[
+              { id: "edit-beranda", label: "Edit Beranda", icon: <Sun className="w-4.5 h-4.5 text-[#D4A017]" /> },
+              { id: "edit-tentang-kami", label: "Edit Tentang Kami", icon: <FileText className="w-4.5 h-4.5 text-emerald-400" /> },
+              { id: "edit-testimoni", label: "Edit Testimoni", icon: <HelpCircle className="w-4.5 h-4.5 text-blue-400" /> },
+              { id: "edit-sop", label: "Edit SOP Kawasan", icon: <Shield className="w-4.5 h-4.5 text-rose-400" /> }
             ].map((tab) => {
               const active = activeTab === tab.id;
               return (
@@ -1677,6 +1777,1015 @@ export default function AdminDashboard({
                   </button>
                 </div>
               </div>
+
+            </div>
+          )}
+
+          {/* TAB 12: EDIT KONTEN BERANDA */}
+          {activeTab === "edit-beranda" && (
+            <div className="space-y-8 animate-fade-in text-slate-800">
+              <div className="border-b border-orange-100 pb-5">
+                <h3 className="text-xl font-display text-slate-900 uppercase tracking-tight">Edit Konten Beranda</h3>
+                <p className="text-slate-500 text-xs font-sans mt-0.5">Atur visual, tagline slogan, dan tiga metrik utama yang tampil di layar utama utama (Hero).</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                {/* Inputs card */}
+                <div className="lg:col-span-7 bg-white border border-slate-200 rounded-3xl p-6 space-y-5 shadow-sm">
+                  <h4 className="text-[10px] font-mono text-[#D4A017] uppercase font-bold tracking-widest block mb-1">DATA LAYOUT HERO</h4>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Nama / Logo Kawasan (Beranda)</label>
+                      <input
+                        type="text"
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800"
+                        value={settings.logoName || ""}
+                        onChange={(e) => setSettings({ ...settings, logoName: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Slogan Tagline</label>
+                      <input
+                        type="text"
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800"
+                        value={settings.tagline || ""}
+                        onChange={(e) => setSettings({ ...settings, tagline: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Teks Kepemilikan & Status Kawasan</label>
+                      <input
+                        type="text"
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800"
+                        value={settings.heroEstText || ""}
+                        onChange={(e) => setSettings({ ...settings, heroEstText: e.target.value })}
+                        placeholder="ESTABLISHED IN 2021 | MT. LOMPOBATTANG SECTOR"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">URL Foto Background Hero</label>
+                      <input
+                        type="text"
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-mono"
+                        value={settings.heroBackgroundUrl || ""}
+                        onChange={(e) => setSettings({ ...settings, heroBackgroundUrl: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                      <div>
+                        <label className="block text-[9px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Metrik 1 (Ketinggian)</label>
+                        <input
+                          type="text"
+                          className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800"
+                          value={settings.heroHeightMetric || ""}
+                          onChange={(e) => setSettings({ ...settings, heroHeightMetric: e.target.value })}
+                          placeholder="1,450M"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Metrik 2 (Jalur Trek)</label>
+                        <input
+                          type="text"
+                          className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800"
+                          value={settings.heroTrailsMetric || ""}
+                          onChange={(e) => setSettings({ ...settings, heroTrailsMetric: e.target.value })}
+                          placeholder="8 ACTIVE"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Metrik 3 (Konservasi)</label>
+                        <input
+                          type="text"
+                          className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800"
+                          value={settings.heroConservationMetric || ""}
+                          onChange={(e) => setSettings({ ...settings, heroConservationMetric: e.target.value })}
+                          placeholder="2,400 HA"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 flex justify-end">
+                    <button
+                      onClick={() => {
+                        setNotifications((prev) => ["Beranda Hero metrics successfully updated!", ...prev]);
+                        alert("Hero Header dan Metrik Beranda berhasil disimpan!");
+                      }}
+                      className="px-5 py-2.5 bg-[#D4A017] hover:bg-[#F28C28] text-slate-950 hover:text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow cursor-pointer flex items-center space-x-1.5"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>Simpan Beranda</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Simulated Preview card */}
+                <div className="lg:col-span-5 space-y-4">
+                  <h4 className="text-[10px] font-mono text-slate-400 uppercase font-bold tracking-widest block text-left">ESTETIKA PREVIEW</h4>
+                  
+                  <div className="relative rounded-3xl overflow-hidden h-[340px] border border-orange-100/50 shadow flex flex-col justify-between p-6 bg-cover bg-center text-white" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.4)), url(${settings.heroBackgroundUrl || "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b"})` }}>
+                    <div className="text-center font-mono text-[9px] uppercase tracking-widest text-[#E0A926]">
+                      {settings.heroEstText || "ESTABLISHED IN 2021 | MT. LOMPOBATTANG SECTOR"}
+                    </div>
+
+                    <div className="text-center space-y-1.5">
+                      <h4 className="font-display text-2xl uppercase tracking-tighter leading-none">{settings.logoName || "BONTOLOJONG"}</h4>
+                      <p className="text-[10px] font-sans tracking-wide italic text-orange-100 opacity-90">{settings.tagline || "Petualangan Luhur Di Lembah Pusaka"}</p>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 text-center border-t border-white/20 pt-4 font-sans bg-black/30 p-2.5 rounded-2xl">
+                      <div>
+                        <span className="block text-sm font-black font-display font-bold text-[#E0A926]">{settings.heroHeightMetric || "1,450M"}</span>
+                        <span className="block text-[8px] font-mono uppercase text-slate-200 mt-0.5">Ketinggian</span>
+                      </div>
+                      <div>
+                        <span className="block text-sm font-black font-display font-bold text-[#E0A926]">{settings.heroTrailsMetric || "8 ACTIVE"}</span>
+                        <span className="block text-[8px] font-mono uppercase text-slate-200 mt-0.5">Jalur Trek</span>
+                      </div>
+                      <div>
+                        <span className="block text-sm font-black font-display font-bold text-[#E0A926]">{settings.heroConservationMetric || "2,400 HA"}</span>
+                        <span className="block text-[8px] font-mono uppercase text-slate-200 mt-0.5">Lindung</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          )}
+
+          {/* TAB 13: EDIT TENTANG KAMI */}
+          {activeTab === "edit-tentang-kami" && (
+            <div className="space-y-8 animate-fade-in text-slate-800">
+              <div className="border-b border-orange-100 pb-5">
+                <h3 className="text-xl font-display text-slate-900 uppercase tracking-tight">Edit Konten Tentang Kami</h3>
+                <p className="text-slate-500 text-xs font-sans mt-0.5">Ubah histori kebangkitan kawasan, takdir konservasi, serta visi agrowisata agung Bontolojong.</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* Form fields */}
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 space-y-5 shadow-sm text-left">
+                  <h4 className="text-[10px] font-mono text-[#D4A017] uppercase font-bold tracking-widest block mb-1">HISTORI & MISI KAWASAN</h4>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Tautan URL Foto Utama Tentang Kami</label>
+                      <input
+                        type="text"
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-mono"
+                        value={settings.aboutImageUrl || ""}
+                        onChange={(e) => setSettings({ ...settings, aboutImageUrl: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Judul Sejarah Singkat</label>
+                      <input
+                        type="text"
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800"
+                        value={settings.aboutHistoryTitle || ""}
+                        onChange={(e) => setSettings({ ...settings, aboutHistoryTitle: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Paragraf Sejarah 1</label>
+                      <textarea
+                        rows={3}
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 leading-relaxed font-sans"
+                        value={settings.aboutHistoryDesc1 || ""}
+                        onChange={(e) => setSettings({ ...settings, aboutHistoryDesc1: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Paragraf Sejarah 2</label>
+                      <textarea
+                        rows={3}
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 leading-relaxed font-sans"
+                        value={settings.aboutHistoryDesc2 || ""}
+                        onChange={(e) => setSettings({ ...settings, aboutHistoryDesc2: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Visi Misi dan Semboyan Konservasi</label>
+                      <textarea
+                        rows={2}
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-bold"
+                        value={settings.aboutMissionText || ""}
+                        onChange={(e) => setSettings({ ...settings, aboutMissionText: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4 flex justify-end">
+                    <button
+                      onClick={() => {
+                        setNotifications((prev) => ["About page data successfully saved!", ...prev]);
+                        alert("Data deskripsi Tentang Kami berhasil disimpan!");
+                      }}
+                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow cursor-pointer flex items-center space-x-1.5"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>Simpan Tentang Kami</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Preview layout box */}
+                <div className="space-y-4 text-left">
+                  <h4 className="text-[10px] font-mono text-slate-400 uppercase font-bold tracking-widest block font-bold">PREVIEW TENTANG KAMI</h4>
+
+                  <div className="border border-slate-200 rounded-3xl bg-slate-50 p-6 space-y-4">
+                    <div className="w-full h-40 rounded-2xl overflow-hidden bg-slate-200 border">
+                      <img
+                        src={settings.aboutImageUrl || "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09"}
+                        alt="Tentang kami preview image"
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <h4 className="font-display text-lg uppercase text-slate-900 border-b border-orange-100 pb-1">{settings.aboutHistoryTitle || "SINKRONISASI SEJARAH PUSAKA"}</h4>
+                      <p className="text-slate-650 text-[11px] leading-relaxed font-light line-clamp-3">{settings.aboutHistoryDesc1}</p>
+                      <p className="text-slate-655 text-[11px] leading-relaxed font-light line-clamp-3">{settings.aboutHistoryDesc2}</p>
+                      <div className="p-3 bg-emerald-100/30 border border-emerald-100 rounded-xl">
+                        <span className="block text-[9px] font-mono font-bold tracking-wider text-emerald-800 mb-1">🌲 VISI &amp; MISI PETUALANGAN</span>
+                        <p className="text-emerald-950 font-sans text-xs italic font-semibold">"{settings.aboutMissionText}"</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          )}
+
+          {/* TAB 14: EDIT TESTIMONI */}
+          {activeTab === "edit-testimoni" && (
+            <div className="space-y-8 animate-fade-in text-slate-800">
+              <div className="border-b border-orange-100 pb-5 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                <div>
+                  <h3 className="text-xl font-display text-slate-900 uppercase tracking-tight">Edit Testimoni Pengunjung</h3>
+                  <p className="text-slate-500 text-xs font-sans mt-0.5">Kelola verifikasi, bintang kepuasan, masukan, dan cerita perjalanan pendaki di Bontolojong.</p>
+                </div>
+                <span className="mt-2 sm:mt-0 px-3.5 py-1.5 bg-blue-50 text-blue-700 font-mono text-[9px] font-bold uppercase tracking-widest rounded-lg border border-blue-100 shadow-sm inline-block leading-none">
+                  ⭐ Rekor Kepuasan Aktif
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                {/* Form to append new review */}
+                <div className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm text-left">
+                  <h4 className="text-[10px] font-mono text-[#D4A017] uppercase font-bold tracking-widest block mb-1">✏ TAMBAH REVIU TERVERIFIKASI</h4>
+                  
+                  <div className="space-y-3.5">
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Nama Lengkap Pendaki</label>
+                      <input
+                        type="text"
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-semibold"
+                        value={newTestimonial.name || ""}
+                        onChange={(e) => setNewTestimonial({ ...newTestimonial, name: e.target.value })}
+                        placeholder="e.g. Rian Gumilang"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Status / Rencana</label>
+                        <input
+                          type="text"
+                          className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800 animate-none"
+                          value={newTestimonial.role || ""}
+                          onChange={(e) => setNewTestimonial({ ...newTestimonial, role: e.target.value })}
+                          placeholder="e.g. Pendaki Backpacker"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Rating Bintang (1-5)</label>
+                        <select
+                          className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800 font-mono font-bold"
+                          value={newTestimonial.rating || 5}
+                          onChange={(e) => setNewTestimonial({ ...newTestimonial, rating: parseInt(e.target.value) || 5 })}
+                        >
+                          <option value="5">⭐⭐⭐⭐⭐ 5 Bintang</option>
+                          <option value="4">⭐⭐⭐⭐ 4 Bintang</option>
+                          <option value="3">⭐⭐⭐ 3 Bintang</option>
+                          <option value="2">⭐⭐ 2 Bintang</option>
+                          <option value="1">⭐ 1 Bintang</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Tautan Foto Profil Avatar</label>
+                      <input
+                        type="text"
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800 font-mono"
+                        value={newTestimonial.avatarUrl || ""}
+                        onChange={(e) => setNewTestimonial({ ...newTestimonial, avatarUrl: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Kesan Pesan / Feedback Ulasan</label>
+                      <textarea
+                        rows={3}
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-light font-sans leading-relaxed"
+                        value={newTestimonial.comment || ""}
+                        onChange={(e) => setNewTestimonial({ ...newTestimonial, comment: e.target.value })}
+                        placeholder="Ketik ulasan berharga mereka disini..."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      onClick={() => {
+                        if (!newTestimonial.name || !newTestimonial.comment) {
+                          alert("Mohon isi kolom Nama dan Kesan terlebih dahulu!");
+                          return;
+                        }
+                        const item: Testimonial = {
+                          id: "testi-" + Date.now(),
+                          name: newTestimonial.name,
+                          role: newTestimonial.role || "Pengunjung",
+                          comment: newTestimonial.comment,
+                          rating: newTestimonial.rating || 5,
+                          date: newTestimonial.date || "Baru saja",
+                          avatarUrl: newTestimonial.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"
+                        };
+                        setTestimonials([item, ...testimonials]);
+                        setNewTestimonial({
+                          name: "",
+                          role: "Pengunjung",
+                          comment: "",
+                          rating: 5,
+                          date: new Date().toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" }),
+                          avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"
+                        });
+                        setNotifications((prev) => [`Added new verified testimonial from ${item.name}`, ...prev]);
+                        alert("Ulasan sukses dipasang ke dalam basis data!");
+                      }}
+                      className="w-full py-3 bg-[#D4A017] hover:bg-[#F28C28] text-slate-950 hover:text-white font-sans text-xs font-bold uppercase rounded-xl tracking-widest shadow transition-all cursor-pointer flex items-center justify-center space-x-1"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Terbitkan Reviu</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* List editor */}
+                <div className="lg:col-span-7 space-y-4">
+                  <h4 className="text-[10px] font-mono text-slate-400 uppercase font-bold tracking-widest block text-left">DAFTAR REVIU AKTIF ({testimonials.length})</h4>
+                  
+                  <div className="space-y-3 max-h-[460px] overflow-y-auto pr-2">
+                    {testimonials.map((testi) => (
+                      <div key={testi.id} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex justify-between items-start text-left gap-4 hover:border-slate-200 transition-colors">
+                        <div className="flex gap-3">
+                          <img
+                            src={testi.avatarUrl}
+                            alt={testi.name}
+                            referrerPolicy="no-referrer"
+                            className="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0 mt-0.5"
+                          />
+                          <div>
+                            <div className="flex items-center space-x-2">
+                              <strong className="block text-xs text-slate-900 leading-none">{testi.name}</strong>
+                              <span className="block text-[9px] font-mono text-[#D4A017] leading-none">{"★".repeat(testi.rating)}</span>
+                            </div>
+                            <span className="block text-[9px] text-slate-400 mt-1 font-mono">{testi.role} • {testi.date}</span>
+                            <p className="text-[11px] font-sans text-slate-650 mt-1.5 leading-relaxed font-light italic">"{testi.comment}"</p>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            if (confirm(`Apakah Anda yakin ingin menghapus reviu milik ${testi.name}?`)) {
+                              setTestimonials((prev) => prev.filter((t) => t.id !== testi.id));
+                            }
+                          }}
+                          className="p-1.5 bg-red-50 hover:bg-red-100 text-red-655 hover:text-red-700 transition-colors rounded-lg cursor-pointer max-w-min align-top mt-1"
+                          title="Hapus testimonial"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          )}
+
+          {/* TAB 15: EDIT SOP KAWASAN */}
+          {activeTab === "edit-sop" && (
+            <div className="space-y-8 animate-fade-in text-slate-800">
+              <div className="border-b border-orange-100 pb-5">
+                <h3 className="text-xl font-display text-slate-900 uppercase tracking-tight">Edit SOP Pendakian Kawasan</h3>
+                <p className="text-slate-500 text-xs font-sans mt-0.5">Kelola jam operasional, registrasi, perlengkapan mandiri, aturan sampah zero-plastic, dan sanksi pengelola.</p>
+              </div>
+
+              {/* Sub tabs of SOP manager */}
+              <div className="flex flex-wrap gap-2 border-b border-slate-100 pb-3 justify-start" id="sop-sub-tab-navigator">
+                {[
+                  { id: "hours", label: "⏱ Jam Reservasi" },
+                  { id: "gears", label: "🎒 Perlengkapan Wajib" },
+                  { id: "general", label: "📋 Ketentuan Umum" },
+                  { id: "waste", label: "♻ Aturan Sampah" },
+                  { id: "ethics", label: "🤝 Rukun Etika" },
+                  { id: "penalties", label: "⚖ Skema Sanksi" }
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setSopEditorSubSection(item.id as any)}
+                    className={`px-3.5 py-1.5 rounded-lg text-[10px] font-mono tracking-wider font-extrabold uppercase transition-colors cursor-pointer ${
+                      sopEditorSubSection === item.id
+                        ? "bg-[#D4A017] text-white"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-600"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* SECTION: HOURS */}
+              {sopEditorSubSection === "hours" && (
+                <div className="space-y-5 animate-fade-in text-left max-w-3xl">
+                  <h4 className="text-[10px] font-mono text-[#D4A017] uppercase font-bold tracking-widest block">⚙ JAM OPERASIONAL &amp; PROSEDUR</h4>
+                  
+                  <div className="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Jam SIMAKSI / Registrasi Gerbang</label>
+                        <input
+                          type="text"
+                          className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-mono font-bold"
+                          value={settings.sopSimaksiHours || ""}
+                          onChange={(e) => setSettings({ ...settings, sopSimaksiHours: e.target.value })}
+                          placeholder="e.g. 07.00 - 17.30 WITA"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Batas Maksimal Naik (Sore)</label>
+                        <input
+                          type="text"
+                          className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-mono font-bold"
+                          value={settings.sopMaxAscentHours || ""}
+                          onChange={(e) => setSettings({ ...settings, sopMaxAscentHours: e.target.value })}
+                          placeholder="e.g. 15.00 WITA"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Prosedur Check-Out Gunung</label>
+                      <textarea
+                        rows={3}
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 leading-relaxed"
+                        value={settings.sopCheckoutDesc || ""}
+                        onChange={(e) => setSettings({ ...settings, sopCheckoutDesc: e.target.value })}
+                        placeholder="Wajib Check-Out dan melapor kembali setelah turun..."
+                      />
+                    </div>
+
+                    <div className="pt-2 flex justify-end">
+                      <button
+                        onClick={() => {
+                          setNotifications((prev) => ["SOP operational checkpoints updated", ...prev]);
+                          alert("Jadwal operasional SOP berhasil disimpan!");
+                        }}
+                        className="px-5 py-2.5 bg-[#D4A017] hover:bg-[#F28C28] text-slate-950 hover:text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all cursor-pointer flex items-center space-x-1"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>Simpan Jadwal</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION: GEARS */}
+              {sopEditorSubSection === "gears" && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-left animate-fade-in">
+                  
+                  {/* Append gear form */}
+                  <div className="lg:col-span-5 bg-white border border-slate-200 p-6 rounded-3xl space-y-4 shadow-sm">
+                    <h4 className="text-[10px] font-mono text-[#D4A017] uppercase font-bold tracking-widest block mb-1">✚ TAMBAH PERLENGKAPAN WAJIB</h4>
+                    
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Nama Alat / Perlengkapan</label>
+                      <input
+                        type="text"
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-semibold"
+                        value={newSopGear.name}
+                        onChange={(e) => setNewSopGear({ ...newSopGear, name: e.target.value })}
+                        placeholder="e.g. Senter / Headlamp"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Kategori Tag Label</label>
+                        <input
+                          type="text"
+                          className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800"
+                          value={newSopGear.tag}
+                          onChange={(e) => setNewSopGear({ ...newSopGear, tag: e.target.value })}
+                          placeholder="e.g. Wajib"
+                        />
+                      </div>
+                      <div className="text-center flex flex-col justify-end">
+                        <span className="text-[9px] text-slate-400 font-mono italic mb-1.5 block">Saran Ikon:</span>
+                        <span className="p-2 bg-amber-50 text-[10px] font-mono uppercase font-bold rounded-lg leading-none border">AUTO-SELECTED</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Petunjuk Penggunaan</label>
+                      <textarea
+                        rows={2.5}
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800 font-light font-sans"
+                        value={newSopGear.desc}
+                        onChange={(e) => setNewSopGear({ ...newSopGear, desc: e.target.value })}
+                        placeholder="Bawa senter cadangan untuk melakukan sunrise trekking..."
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        if (!newSopGear.name || !newSopGear.desc) {
+                          alert("Mohon lengkapi Nama barang dan Petunjuk penggunaan!");
+                          return;
+                        }
+                        const item = {
+                          id: "gear-" + Date.now(),
+                          name: newSopGear.name,
+                          desc: newSopGear.desc,
+                          tag: newSopGear.tag
+                        };
+                        setSopGears([...sopGears, item]);
+                        setNewSopGear({ name: "", desc: "", tag: "Wajib" });
+                        setNotifications((prev) => [`Added mandatory gear item: ${item.name}`, ...prev]);
+                        alert("Perlengkapan wajib berhasil ditambahkan!");
+                      }}
+                      className="w-full py-3 bg-[#D4A017] hover:bg-[#F28C28] text-slate-950 hover:text-white font-sans text-xs font-bold uppercase rounded-xl tracking-widest cursor-pointer flex items-center justify-center space-x-1.5"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Tambahkan Barang</span>
+                    </button>
+                  </div>
+
+                  {/* Gears tabular layout */}
+                  <div className="lg:col-span-7 space-y-4">
+                    <h4 className="text-[10px] font-mono text-slate-400 uppercase font-bold tracking-widest block">BARANG PEMERIKSAAN AKTIF ({sopGears.length})</h4>
+                    
+                    <div className="space-y-3.5 max-h-[460px] overflow-y-auto pr-2">
+                      {sopGears.map((g) => (
+                        <div key={g.id} className="p-4 bg-white border border-slate-100 shadow-sm rounded-2xl flex justify-between items-center gap-4">
+                          <div>
+                            <div className="flex items-center space-x-2">
+                              <span className="font-sans font-bold text-xs text-slate-950">{g.name}</span>
+                              <span className="px-1.5 py-0.5 rounded bg-amber-100 text-[#7A4E2D] text-[8.5px] font-mono uppercase font-bold leading-none">{g.tag}</span>
+                            </div>
+                            <p className="text-slate-500 font-sans text-[11px] mt-1 font-light leading-snug">{g.desc}</p>
+                          </div>
+                          
+                          <button
+                            onClick={() => {
+                              setSopGears((prev) => prev.filter((item) => item.id !== g.id));
+                            }}
+                            className="p-1.5 bg-red-50 hover:bg-red-100 text-red-650 rounded-lg cursor-pointer shrink-0 animate-none"
+                            title="Hapus barang"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+              {/* SECTION: GENERAL RULES */}
+              {sopEditorSubSection === "general" && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-left animate-fade-in">
+                  
+                  {/* Form */}
+                  <div className="lg:col-span-5 bg-white border border-slate-200 p-6 rounded-3xl space-y-4 shadow-sm">
+                    <h4 className="text-[10px] font-mono text-[#D4A017] uppercase font-bold tracking-widest block mb-1">✚ TAMBAH KETENTUAN UMUM</h4>
+                    
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="col-span-1">
+                        <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">No. Urut</label>
+                        <input
+                          type="text"
+                          className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 text-center font-mono font-bold"
+                          value={newSopGeneralRule.num}
+                          onChange={(e) => setNewSopGeneralRule({ ...newSopGeneralRule, num: e.target.value })}
+                          placeholder="e.g. 07"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Judul Aturan</label>
+                        <input
+                          type="text"
+                          className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-semibold"
+                          value={newSopGeneralRule.title}
+                          onChange={(e) => setNewSopGeneralRule({ ...newSopGeneralRule, title: e.target.value })}
+                          placeholder="Aturan pendaftaran..."
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Keterangan / Deskripsi Aturan</label>
+                      <textarea
+                        rows={3.5}
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800 font-light"
+                        value={newSopGeneralRule.desc}
+                        onChange={(e) => setNewSopGeneralRule({ ...newSopGeneralRule, desc: e.target.value })}
+                        placeholder="Berikan penjelasan formal mengenai aturan tersebut di sini..."
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        if (!newSopGeneralRule.title || !newSopGeneralRule.desc) {
+                          alert("Mohon isi judul dan keterangan aturan!");
+                          return;
+                        }
+                        const rIndex = sopGeneralRules.length + 1;
+                        const item = {
+                          id: "general-" + Date.now(),
+                          num: newSopGeneralRule.num || (rIndex < 10 ? `0${rIndex}` : `${rIndex}`),
+                          title: newSopGeneralRule.title,
+                          desc: newSopGeneralRule.desc
+                        };
+                        setSopGeneralRules([...sopGeneralRules, item]);
+                        setNewSopGeneralRule({ num: "", title: "", desc: "" });
+                        setNotifications((prev) => [`Added general rule: ${item.title}`, ...prev]);
+                        alert("Ketentuan umum sukses ditambahkan!");
+                      }}
+                      className="w-full py-3 bg-[#D4A017] hover:bg-[#F28C28] text-slate-950 hover:text-white font-sans text-xs font-bold uppercase rounded-xl tracking-widest cursor-pointer flex items-center justify-center space-x-1.5"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Tambahkan Aturan</span>
+                    </button>
+                  </div>
+
+                  {/* List panel */}
+                  <div className="lg:col-span-7 space-y-4">
+                    <h4 className="text-[10px] font-mono text-slate-405 uppercase font-bold tracking-widest block font-bold">KETENTUAN UMUM AKTIF ({sopGeneralRules.length})</h4>
+                    
+                    <div className="space-y-3.5 max-h-[460px] overflow-y-auto pr-2">
+                      {sopGeneralRules.map((rl) => (
+                        <div key={rl.id} className="p-4 bg-white border border-slate-100 shadow-sm rounded-2xl flex justify-between items-start gap-4">
+                          <div className="flex items-start space-x-3">
+                            <span className="font-mono text-sm font-black text-[#D4A017] bg-orange-50 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                              {rl.num}
+                            </span>
+                            <div>
+                              <strong className="block text-xs uppercase text-[#7A4E2D] font-bold">{rl.title}</strong>
+                              <p className="text-slate-500 font-sans text-[11px] leading-relaxed mt-1 font-light">{rl.desc}</p>
+                            </div>
+                          </div>
+                          
+                          <button
+                            onClick={() => {
+                              setSopGeneralRules((prev) => prev.filter((item) => item.id !== rl.id));
+                            }}
+                            className="p-1.5 bg-red-50 hover:bg-red-100 text-red-650 rounded-lg cursor-pointer shrink-0 animate-none"
+                            title="Hapus ketentuan"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+              {/* SECTION: WASTE RULES */}
+              {sopEditorSubSection === "waste" && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-left animate-fade-in">
+                  
+                  {/* Form */}
+                  <div className="lg:col-span-5 bg-white border border-slate-200 p-6 rounded-3xl space-y-4 shadow-sm">
+                    <h4 className="text-[10px] font-mono text-[#D4A017] uppercase font-bold tracking-widest block mb-1">✚ TAMBAH REGULASI SAMPAH</h4>
+                    
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Judul Protokol Sampah</label>
+                      <input
+                        type="text"
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-semibold"
+                        value={newSopWasteRule.title}
+                        onChange={(e) => setNewSopWasteRule({ ...newSopWasteRule, title: e.target.value })}
+                        placeholder="e.g. Pembatasan Sachet Sekali Pakai..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Semboyan Tindakan (Action tag)</label>
+                      <input
+                        type="text"
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800 animate-none"
+                        value={newSopWasteRule.action}
+                        onChange={(e) => setNewSopWasteRule({ ...newSopWasteRule, action: e.target.value })}
+                        placeholder="e.g. Wajib Bawa Turun"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Kebijakan Sampah</label>
+                      <textarea
+                        rows={2.5}
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800 font-light"
+                        value={newSopWasteRule.desc}
+                        onChange={(e) => setNewSopWasteRule({ ...newSopWasteRule, desc: e.target.value })}
+                        placeholder="Setiap rombongan dilarang membawa kemasan botol minuman plastik..."
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        if (!newSopWasteRule.title || !newSopWasteRule.desc) {
+                          alert("Mohon lengkapi judul regulasi sampah dantolak ukurnya!");
+                          return;
+                        }
+                        const item = {
+                          id: "waste-" + Date.now(),
+                          title: newSopWasteRule.title,
+                          desc: newSopWasteRule.desc,
+                          action: newSopWasteRule.action
+                        };
+                        setSopWasteRules([...sopWasteRules, item]);
+                        setNewSopWasteRule({ title: "", desc: "", action: "Wajib Bawa Turun" });
+                        setNotifications((prev) => [`Added waste eco regulation: ${item.title}`, ...prev]);
+                        alert("Regulasi sampah berhasil dipasang!");
+                      }}
+                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-sans text-xs font-bold uppercase rounded-xl tracking-widest cursor-pointer flex items-center justify-center space-x-1.5"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Tambahkan Regulasi</span>
+                    </button>
+                  </div>
+
+                  {/* List display */}
+                  <div className="lg:col-span-7 space-y-4">
+                    <h4 className="text-[10px] font-mono text-slate-405 uppercase font-bold tracking-widest block font-bold">REGULASI SAMPAH AKTIF ({sopWasteRules.length})</h4>
+                    
+                    <div className="grid grid-cols-1 gap-3.5 max-h-[460px] overflow-y-auto pr-2">
+                      {sopWasteRules.map((wr) => (
+                        <div key={wr.id} className="p-4 bg-white border border-dashed border-emerald-200 hover:bg-emerald-50/5 rounded-2xl flex justify-between items-center transition-colors">
+                          <div>
+                            <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[8px] font-mono font-bold tracking-wider uppercase rounded">
+                              {wr.action}
+                            </span>
+                            <h5 className="font-sans font-extrabold text-xs text-emerald-950 uppercase mt-1.5 leading-tight">{wr.title}</h5>
+                            <p className="text-slate-600 font-sans text-[11px] leading-relaxed mt-1 font-light">{wr.desc}</p>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              setSopWasteRules((prev) => prev.filter((item) => item.id !== wr.id));
+                            }}
+                            className="p-1.5 bg-red-50 hover:bg-red-100 text-red-650 rounded-lg cursor-pointer shrink-0 ml-2 animate-none"
+                            title="Hapus Aturan"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+              {/* SECTION: ETHICS */}
+              {sopEditorSubSection === "ethics" && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-left animate-fade-in">
+                  
+                  {/* Add form */}
+                  <div className="lg:col-span-5 bg-white border border-slate-200 p-6 rounded-3xl space-y-4 shadow-sm">
+                    <h4 className="text-[10px] font-mono text-[#D4A017] uppercase font-bold tracking-widest block mb-1">✚ TAMBAH ETIKA PENDAKIAN</h4>
+                    
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Nama Aturan Etika</label>
+                      <input
+                        type="text"
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-semibold"
+                        value={newSopEthicsRule.title}
+                        onChange={(e) => setNewSopEthicsRule({ ...newSopEthicsRule, title: e.target.value })}
+                        placeholder="e.g. Larangan Corat-Coret Vandalisme..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Saran Logo (Keyword Pengenal)</label>
+                      <select
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800 font-mono font-bold"
+                        value={newSopEthicsRule.iconName}
+                        onChange={(e) => setNewSopEthicsRule({ ...newSopEthicsRule, iconName: e.target.value })}
+                      >
+                        <option value="Ban">🚫 Dilarang (Ban / Red Alert)</option>
+                        <option value="Flame">🔥 Api / Pembakaran (Flame)</option>
+                        <option value="HeartHandshake">🤝 Sosial / Kearifan Lokal (HeartHandshake)</option>
+                        <option value="ShieldAlert">🛡️ Safety / Keselamatan (ShieldAlert)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Petunjuk Rukun Etika</label>
+                      <textarea
+                        rows={2.5}
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800 font-light"
+                        value={newSopEthicsRule.desc}
+                        onChange={(e) => setNewSopEthicsRule({ ...newSopEthicsRule, desc: e.target.value })}
+                        placeholder="Harap menyapa dengan senyum sopan di sepanjang rute agrowisata setempat..."
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        if (!newSopEthicsRule.title || !newSopEthicsRule.desc) {
+                          alert("Mohon isi judul dan petunjuk etika pendakian!");
+                          return;
+                        }
+                        const item = {
+                          id: "ethics-" + Date.now(),
+                          title: newSopEthicsRule.title,
+                          desc: newSopEthicsRule.desc,
+                          iconName: newSopEthicsRule.iconName
+                        };
+                        setSopEthicsRules([...sopEthicsRules, item]);
+                        setNewSopEthicsRule({ title: "", desc: "", iconName: "Ban" });
+                        setNotifications((prev) => [`Added hiking ethics item: ${item.title}`, ...prev]);
+                        alert("SOP etika pendakian sukses ditambah!");
+                      }}
+                      className="w-full py-3 bg-[#D4A017] hover:bg-[#F28C28] text-slate-950 hover:text-white font-sans text-xs font-bold uppercase rounded-xl tracking-widest cursor-pointer flex items-center justify-center space-x-1.5"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Pasang Rukun Etika</span>
+                    </button>
+                  </div>
+
+                  {/* List panels */}
+                  <div className="lg:col-span-7 space-y-4">
+                    <h4 className="text-[10px] font-mono text-slate-405 uppercase font-bold tracking-widest block font-bold">RUKUN ETIKA AKTIF ({sopEthicsRules.length})</h4>
+                    
+                    <div className="grid grid-cols-1 gap-3.5 max-h-[460px] overflow-y-auto pr-2">
+                      {sopEthicsRules.map((et) => (
+                        <div key={et.id} className="p-4 bg-white border border-slate-100 shadow-sm rounded-2xl flex justify-between items-center gap-4">
+                          <div>
+                            <div className="flex items-center space-x-1.5">
+                              <span className="text-xs">🔑</span>
+                              <strong className="block text-xs text-slate-900">{et.title}</strong>
+                            </div>
+                            <span className="block text-[8px] font-mono text-[#FFF8EF] border bg-amber-600 uppercase font-bold mt-1.5 px-1 py-0.5 rounded tracking-wider leading-none">Ikon: {et.iconName}</span>
+                            <p className="text-slate-500 font-sans text-[11px] leading-relaxed mt-1 font-light">{et.desc}</p>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              setSopEthicsRules((prev) => prev.filter((item) => item.id !== et.id));
+                            }}
+                            className="p-1.5 bg-red-50 hover:bg-red-100 text-red-650 rounded-lg cursor-pointer shrink-0 animate-none"
+                            title="Hapus rukun etika"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+              {/* SECTION: PENALTIES */}
+              {sopEditorSubSection === "penalties" && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-left animate-fade-in">
+                  
+                  {/* Add form */}
+                  <div className="lg:col-span-5 bg-white border border-slate-200 p-6 rounded-3xl space-y-4 shadow-sm">
+                    <h4 className="text-[10px] font-mono text-[#D4A017] uppercase font-bold tracking-widest block mb-1">✚ TAMBAH TINGKAT SANKSI</h4>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Level / Tingkat</label>
+                        <select
+                          className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800 font-mono font-bold"
+                          value={newSopPenalty.level}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            let col = "border-amber-200 bg-amber-50/50 text-amber-900";
+                            if (val === "Tingkat II") col = "border-orange-200 bg-orange-50/50 text-orange-900";
+                            if (val === "Tingkat III") col = "border-rose-200 bg-rose-50/50 text-rose-900";
+                            if (val === "Tingkat IV") col = "border-red-300 bg-red-50/70 text-red-950 font-bold";
+                            setNewSopPenalty({ ...newSopPenalty, level: val, color: col });
+                          }}
+                        >
+                          <option value="Tingkat I">Tingkat I (Teguran)</option>
+                          <option value="Tingkat II">Tingkat II (Pemberhentian)</option>
+                          <option value="Tingkat III">Tingkat III (Blacklist)</option>
+                          <option value="Tingkat IV">Tingkat IV (Hukum/Denda)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Sanksi Pengelola</label>
+                        <input
+                          type="text"
+                          className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800 font-semibold"
+                          value={newSopPenalty.name}
+                          onChange={(e) => setNewSopPenalty({ ...newSopPenalty, name: e.target.value })}
+                          placeholder="e.g. Teguran Lisan / Tertulis"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Deskripsi Sanksi Detail</label>
+                      <textarea
+                        rows={3.5}
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none text-slate-800 font-light"
+                        value={newSopPenalty.desc}
+                        onChange={(e) => setNewSopPenalty({ ...newSopPenalty, desc: e.target.value })}
+                        placeholder="Berlaku apabila melalaikan keselamatan dasar..."
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        if (!newSopPenalty.name || !newSopPenalty.desc) {
+                          alert("Mohon lengkapi perincian sanksi pengelola!");
+                          return;
+                        }
+                        const item = {
+                          id: "penalty-" + Date.now(),
+                          level: newSopPenalty.level,
+                          name: newSopPenalty.name,
+                          desc: newSopPenalty.desc,
+                          color: newSopPenalty.color
+                        };
+                        setSopPenalties([...sopPenalties, item]);
+                        setNewSopPenalty({ level: "Tingkat I", name: "", desc: "", color: "border-amber-200 bg-amber-50/50 text-amber-900" });
+                        setNotifications((prev) => [`Added admin penalty level ${item.level}: ${item.name}`, ...prev]);
+                        alert("Skema sanksi berhasil diletakkan!");
+                      }}
+                      className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-sans text-xs font-bold uppercase rounded-xl tracking-widest cursor-pointer flex items-center justify-center space-x-1.5"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Pasang Aturan Sanksi</span>
+                    </button>
+                  </div>
+
+                  {/* List displays */}
+                  <div className="lg:col-span-7 space-y-4">
+                    <h4 className="text-[10px] font-mono text-slate-405 uppercase font-bold tracking-widest block font-bold">TINGKAT SANKSI AKTIF PENGELOLA ({sopPenalties.length})</h4>
+                    
+                    <div className="space-y-3.5 max-h-[460px] overflow-y-auto pr-2">
+                      {sopPenalties.map((pen) => (
+                        <div key={pen.id} className={`p-4 border rounded-xl flex justify-between items-center ${pen.color || "border-amber-200 bg-amber-50/50 text-amber-900"} shadow-sm text-left`}>
+                          <div>
+                            <span className="text-[8px] font-mono uppercase font-bold tracking-wider opacity-70 block">{pen.level}</span>
+                            <h5 className="font-sans font-black text-xs uppercase leading-tight mt-1">{pen.name}</h5>
+                            <p className="text-[11px] font-sans font-light leading-relaxed opacity-90 mt-1">{pen.desc}</p>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              setSopPenalties((prev) => prev.filter((item) => item.id !== pen.id));
+                            }}
+                            className="p-1.5 bg-white/45 hover:bg-white/85 border border-slate-300 text-red-655 rounded-lg cursor-pointer shrink-0 ml-2 animate-none"
+                            title="Hapus Sanksi"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              )}
 
             </div>
           )}

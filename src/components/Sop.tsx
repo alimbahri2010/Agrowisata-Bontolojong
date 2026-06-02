@@ -20,183 +20,50 @@ import {
   Heater,
   Tent
 } from "lucide-react";
+import { SystemSettings } from "../types";
 
-export default function Sop() {
-  const [activeTab, setActiveTab] = useState<"perlengkapan" | "ketentuan" | "sampah" | "etika" | "sanksi">("perlengkapan");
+// Helper dynamically resolves gear icons based on keywords
+const getGearIcon = (name: string) => {
+  const cn = "w-6 h-6 text-[#7A4E2D]";
+  const lower = name.toLowerCase();
+  if (lower.includes("carrier") || lower.includes("tas") || lower.includes("backpack") || lower.includes("daypack")) return <Backpack className={cn} />;
+  if (lower.includes("jaket") || lower.includes("dingin") || lower.includes("suhu") || lower.includes("hangat")) return <Thermometer className={cn} />;
+  if (lower.includes("sepatu") || lower.includes("gunung") || lower.includes("alas footprint")) return <CheckCircle className={cn} />;
+  if (lower.includes("jas") || lower.includes("hujan") || lower.includes("raincoat")) return <CloudRain className={cn} />;
+  if (lower.includes("senter") || lower.includes("lampu") || lower.includes("headlamp") || lower.includes("penerangan")) return <Clock className={cn} />;
+  if (lower.includes("air") || lower.includes("logistik") || lower.includes("minum") || lower.includes("makan")) return <Droplet className={cn} />;
+  if (lower.includes("obat") || lower.includes("p3k") || lower.includes("medis") || lower.includes("perban")) return <Heart className={cn} />;
+  if (lower.includes("sampah") || lower.includes("trash") || lower.includes("kantong hitam")) return <Trash2 className={cn} />;
+  if (lower.includes("flysheet") || lower.includes("tenda") || lower.includes("shelter") || lower.includes("canopy")) return <Tent className={cn} />;
+  if (lower.includes("blanket") || lower.includes("selimut") || lower.includes("thermal") || lower.includes("foil") || lower.includes("panas")) return <Heater className={cn} />;
+  return <Backpack className={cn} />;
+};
 
-  const gearItems = [
-    {
-      name: "Tas Carrier/Daypack",
-      desc: "Tas pendakian yang ergonomis untuk membawa logistik secara aman.",
-      icon: <Backpack className="w-6 h-6 text-[#7A4E2D]" />,
-      tag: "Wajib"
-    },
-    {
-      name: "Jaket Pelindung Dingin",
-      desc: "Melindungi tubuh dari suhu beku ekstrem dataran tinggi Bontolojong.",
-      icon: <Thermometer className="w-6 h-6 text-[#7A4E2D]" />,
-      tag: "Wajib"
-    },
-    {
-      name: "Sepatu Gunung",
-      desc: "Sepatu dengan grip kuat di medan berbatu, licin, dan berlumpur.",
-      icon: <CheckCircle className="w-6 h-6 text-[#7A4E2D]" />,
-      tag: "Sangat Disarankan"
-    },
-    {
-      name: "Jas Hujan",
-      desc: "Sedia payung sebelum hujan; cuaca pegunungan dapat berubah sangat cepat.",
-      icon: <CloudRain className="w-6 h-6 text-[#7A4E2D]" />,
-      tag: "Wajib"
-    },
-    {
-      name: "Senter/Headlamp",
-      desc: "Penerangan utama saat mendaki malam hari atau melakukan sunrise trek.",
-      icon: <Clock className="w-6 h-6 text-[#7A4E2D]" />,
-      tag: "Wajib"
-    },
-    {
-      name: "Air Minum & Logistik",
-      desc: "Sediaan makanan berkalori tinggi & air yang cukup selama ekspedisi.",
-      icon: <Droplet className="w-6 h-6 text-[#7A4E2D]" />,
-      tag: "Cukup & Wajib"
-    },
-    {
-      name: "Obat-obatan Pribadi",
-      desc: "Peralatan medis pribadi untuk pertolongan pertama mandiri.",
-      icon: <Heart className="w-6 h-6 text-[#7A4E2D]" />,
-      tag: "Pribadi"
-    },
-    {
-      name: "Kantong Sampah",
-      desc: "Wadah penampungan sampah bawaan pribadi untuk dibawa turun kembali.",
-      icon: <Trash2 className="w-6 h-6 text-[#7A4E2D]" />,
-      tag: "MUTLAK WAJIB"
-    },
-    {
-      name: "Flysheet / Shelter",
-      desc: "Lembaran kanopi pendukung pelindung angin kencang dan rembesan air.",
-      icon: <Tent className="w-6 h-6 text-[#7A4E2D]" />,
-      tag: "Sangat Dianjurkan"
-    },
-    {
-      name: "Emergency Blanket",
-      desc: "Selimut foil thermal penahan panas tubuh agar terhindar dari hipotermia.",
-      icon: <Heater className="w-6 h-6 text-[#7A4E2D]" />,
-      tag: "Hipotermia Guard"
-    }
-  ];
+// Helper dynamically resolves ethics icons
+const getEthicsIcon = (iconName: string, title?: string) => {
+  const name = (iconName || title || "").toLowerCase();
+  if (name.includes("merusak") || name.includes("miras") || name.includes("alkohol") || name.includes("narkoba") || name.includes("larang") || name.includes("ban")) return <Ban className="w-5 h-5 text-rose-500" />;
+  if (name.includes("api") || name.includes("bakar") || name.includes("flame") || name.includes("kebakaran")) return <Flame className="w-5 h-5 text-[#E0A926]" />;
+  if (name.includes("etika") || name.includes("sopan") || name.includes("hormat") || name.includes("handshake") || name.includes("tertib") || name.includes("warga") || name.includes("damai")) return <HeartHandshake className="w-5 h-5 text-emerald-500" />;
+  if (name.includes("selamat") || name.includes("aman") || name.includes("puncak") || name.includes("nyawa") || name.includes("shield") || name.includes("alert")) return <ShieldAlert className="w-5 h-5 text-blue-500" />;
+  return <ShieldAlert className="w-5 h-5 text-blue-500" />;
+};
 
-  const generalRules = [
-    {
-      num: "01",
-      title: "Wajib Registrasi Sebelum Pendakian",
-      desc: "Setiap pendaki wajib mendaftarkan diri secara sah dan resmi melalui loket gerbang masuk atau sistem online Agrowisata Bontolojong."
-    },
-    {
-      num: "02",
-      title: "Mengisi Data Lengkap Pengunjung",
-      desc: "Memberikan informasi identitas riil serta mencantumkan nomor kontak darurat keluarga terdekat yang dapat dihubungi sewaktu-waktu."
-    },
-    {
-      num: "03",
-      title: "Sehat Jasmani dan Rohani",
-      desc: "Pendaki harus dalam kondisi prima, memiliki stamina yang memadai, dan tidak memiliki riwayat medis berat yang berbahaya di ketinggian."
-    },
-    {
-      num: "04",
-      title: "Minimal Rombongan 2 Orang",
-      desc: "Sangat tidak disarankan melakukan pendakian solo (solo hiking) demi menjaga keselamatan dan saling memantau kondisi di lapangan."
-    },
-    {
-      num: "05",
-      title: "Wajib Mengikuti Safety Briefing",
-      desc: "Mendengarkan arahan dari petugas pemandu wisata / ranger mengenai kondisi jalur terkini, cuaca, serta aturan konservasi alam."
-    },
-    {
-      num: "06",
-      title: "Wajib Check-In & Check-Out",
-      desc: "Melakukan proses absensi masuk saat mendaki dan wajib melapor kembali saat sudah turun guna memantau jumlah pendaki aktif."
-    }
-  ];
+interface SopProps {
+  gears: any[];
+  generalRules: any[];
+  wasteRules: any[];
+  ethicsRules: any[];
+  penalties: any[];
+  settings: SystemSettings;
+}
 
-  const wasteRules = [
-    {
-      title: "Membawa Turun Sampah Sendiri",
-      desc: "Semua logistik makanan/minuman berkemah yang berpotensi menyisakan sampah wajib ditampung kembali ke dalam trash bag milik Anda.",
-      action: "Wajib Bawa Turun"
-    },
-    {
-      title: "Dilarang Meninggalkan Sampah di Jalur",
-      desc: "Sama sekali tidak diperbolehkan membuang, mengubur, atau menyembunyikan sampah plastik di punggungan maupun di puncak gunung.",
-      action: "Nol Toleransi Plastik"
-    },
-    {
-      title: "Inspeksi Sampah Check-Out",
-      desc: "Petugas pos loket bawah akan mencocokkan jumlah sampah bawaan Anda dengan estimasi daftar logistik Anda saat pendaftaran pertama.",
-      action: "Pembersihan Terverifikasi"
-    },
-    {
-      title: "Prinsip Utama Pendaki Lestari",
-      desc: "Memegang teguh filosofi: 'Apa yang dibawa naik ke atas, harus dan wajib hukumnya untuk dibawa turun kembali ke bawah'.",
-      action: "Golden Rule"
-    }
-  ];
+export default function Sop({ gears, generalRules, wasteRules, ethicsRules, penalties, settings }: SopProps) {
+  const [activeTab, setActiveTab] = useState<"perlengkapan" | "ketentuan" | "sampah" | "etika" | "sanksi" >("perlengkapan");
 
-  const ethicsRules = [
-    {
-      title: "Dilarang Merusak Tanaman & Fasilitas",
-      desc: "Dilarang mematahkan ranting, memetik bunga liar, melakukan corat-coret (vandalisme), atau merusak pos-pos peristirahatan umum.",
-      icon: <Ban className="w-5 h-5 text-rose-500" />
-    },
-    {
-      title: "Dilarang Membuat Api Unggun Tanpa Izin",
-      desc: "Api unggun liar berisiko memicu kebakaran kawasan hutan pinus kering. Wajib mematuhi anjuran pembuatan api ramah lingkungan.",
-      icon: <Flame className="w-5 h-5 text-[#E0A926]" />
-    },
-    {
-      title: "Dilarang Membawa Minuman Keras & Narkoba",
-      desc: "Minuman beralkohol membahayakan keselamatan diri sendiri karena merusak kesadaran, serta mengganggu lingkungan sosial sesama pendaki.",
-      icon: <Ban className="w-5 h-5 text-rose-500" />
-    },
-    {
-      title: "Wajib Menjaga Etika & Ketertiban",
-      desc: "Menghormati kearifan lokal warga sekitar, berbicara sopan, tidak menyetel musik kencang (speaker bluetooth) yang merusak ketenangan hutan.",
-      icon: <HeartHandshake className="w-5 h-5 text-emerald-500" />
-    },
-    {
-      title: "Keselamatan di Atas Puncak",
-      desc: "Ingatlah bahwa kepulangan Anda dengan selamat di rumah berkumpul bersama keluarga jauh lebih bernilai dari sekadar pencapaian puncak gunung.",
-      icon: <ShieldAlert className="w-5 h-5 text-blue-500" />
-    }
-  ];
-
-  const penalties = [
-    {
-      level: "Tingkat I",
-      name: "Teguran Tertulis / Lisan",
-      desc: "Diberikan kepada pendaki yang melakukan pelanggaran minor awal seputar kelalaian etika ringan.",
-      color: "border-amber-200 bg-amber-50/50 text-amber-900"
-    },
-    {
-      level: "Tingkat II",
-      name: "Larangan Melanjutkan Pendakian",
-      desc: "Bagi rombongan yang membawa perlengkapan kurang kramah lingkungan atau terbukti melalaikan aspek keselamatan keselamatan dasar.",
-      color: "border-orange-200 bg-orange-50/50 text-orange-900"
-    },
-    {
-      level: "Tingkat III",
-      name: "Blacklist Sementara / Permanen",
-      desc: "Berlaku keras untuk pendaki yang terbukti membuang sampah sembarangan di gunung, merusak fasilitas agrowisata secara sengaja.",
-      color: "border-rose-200 bg-rose-50/50 text-rose-900"
-    },
-    {
-      level: "Tingkat IV",
-      name: "Sanksi Kebijakan Pengelola & Hukum",
-      desc: "Tindakan hukum formal atau denda administratif berat demi memulihkan kerusakan ekosistem agrowisata Bontolojong.",
-      color: "border-red-300 bg-red-50/70 text-red-950 font-bold"
-    }
-  ];
+  const simaksiHours = settings.sopSimaksiHours || "07.00 - 17.30 WITA";
+  const maxAscentHours = settings.sopMaxAscentHours || "15.00 WITA";
+  const checkoutDesc = settings.sopCheckoutDesc || "Wajib Check-Out dan melapor kembali setelah turun dari gunung guna validasi sampah & pendata keselamatan.";
 
   return (
     <section id="sop" className="py-24 px-4 bg-gradient-to-b from-slate-50 to-[#FFF8EF]/20 border-t border-orange-100">
@@ -210,7 +77,7 @@ export default function Sop() {
           <h2 className="text-3xl sm:text-5xl font-display text-charcoal tracking-tight uppercase mt-4 mb-3">
             SOP PENDAKIAN KAWASAN
           </h2>
-          <p className="text-slate-500 font-sans text-sm font-light leading-relaxed">
+          <p className="text-slate-500 font-sans text-sm font-light leading-relaxed font-sans">
             Regulasi operasional resmi pendakian Gunung Lembah Bontolojong &amp; Gunung Bulu Bialo demi mewujudkan petualangan ramah lingkungan, aman, dan lestari.
           </p>
         </div>
@@ -255,10 +122,10 @@ export default function Sop() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {gearItems.map((gear, idx) => (
-                  <div key={idx} className="flex gap-4 p-4.5 rounded-2xl bg-gradient-to-br from-cream/5 to-[#FFF8EF]/20 border border-[#D4A017]/10 hover:border-[#D4A017]/30 transition-all shadow-hover-sm group">
+                {gears.map((gear, idx) => (
+                  <div key={gear.id || idx} className="flex gap-4 p-4.5 rounded-2xl bg-gradient-to-br from-cream/5 to-[#FFF8EF]/20 border border-[#D4A017]/10 hover:border-[#D4A017]/30 transition-all shadow-hover-sm group">
                     <div className="w-11 h-11 rounded-xl bg-orange-100/80 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      {gear.icon}
+                      {getGearIcon(gear.name)}
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center space-x-2">
@@ -293,9 +160,9 @@ export default function Sop() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {generalRules.map((rule, idx) => (
-                  <div key={idx} className="flex items-start space-x-4 p-5 rounded-2xl border border-slate-100 hover:border-orange-100 transition-colors bg-white shadow-sm">
+                  <div key={rule.id || idx} className="flex items-start space-x-4 p-5 rounded-2xl border border-slate-100 hover:border-orange-100 transition-colors bg-white shadow-sm">
                     <span className="font-mono text-xl font-extrabold text-[#D4A017] bg-orange-50 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
-                      {rule.num}
+                      {rule.num || `0${idx + 1}`}
                     </span>
                     <div className="space-y-1">
                       <h4 className="font-sans font-bold text-xs text-[#7A4E2D] uppercase tracking-wide">{rule.title}</h4>
@@ -322,10 +189,10 @@ export default function Sop() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5.5">
                 {wasteRules.map((rule, idx) => (
-                  <div key={idx} className="p-6 rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/10 flex flex-col justify-between space-y-3 shadow-sm hover:bg-emerald-50/25 transition-all">
+                  <div key={rule.id || idx} className="p-6 rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/10 flex flex-col justify-between space-y-3 shadow-sm hover:bg-emerald-50/25 transition-all">
                     <div className="space-y-1.5">
                       <span className="px-2 py-0.5 bg-emerald-100/70 text-emerald-800 text-[9px] font-mono font-bold tracking-widest uppercase rounded">
-                        {rule.action}
+                        {rule.action || "Wajib"}
                       </span>
                       <h4 className="font-sans font-black text-xs text-emerald-950 uppercase mt-2">{rule.title}</h4>
                       <p className="text-slate-600 font-sans text-xs leading-relaxed font-light">{rule.desc}</p>
@@ -357,9 +224,9 @@ export default function Sop() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {ethicsRules.map((eth, idx) => (
-                  <div key={idx} className="flex gap-4 p-5 rounded-2xl border border-slate-100 hover:border-orange-100 bg-white transition-all shadow-sm">
+                  <div key={eth.id || idx} className="flex gap-4 p-5 rounded-2xl border border-slate-100 hover:border-orange-100 bg-white transition-all shadow-sm">
                     <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
-                      {eth.icon}
+                      {getEthicsIcon(eth.iconName, eth.title)}
                     </div>
                     <div className="space-y-1">
                       <h4 className="font-sans font-bold text-xs text-charcoal leading-snug">{eth.title}</h4>
@@ -391,8 +258,8 @@ export default function Sop() {
                   <h4 className="text-[10px] font-mono text-[#7A4E2D] uppercase font-bold tracking-widest block mb-1">Daftar Sanksi Pengelola</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {penalties.map((pen, idx) => (
-                      <div key={idx} className={`p-4 border rounded-xl space-y-1 ${pen.color} shadow-sm`}>
-                        <span className="text-[8px] font-mono uppercase font-bold tracking-wider opacity-70 block">{pen.level}</span>
+                      <div key={pen.id || idx} className={`p-4 border rounded-xl space-y-1 ${pen.color || "border-amber-200 bg-amber-50/50 text-amber-900"} shadow-sm`}>
+                        <span className="text-[8px] font-mono uppercase font-bold tracking-wider opacity-70 block">{pen.level || "Info"}</span>
                         <h5 className="font-sans font-black text-xs uppercase leading-tight">{pen.name}</h5>
                         <p className="text-[11px] font-sans font-light leading-relaxed opacity-90">{pen.desc}</p>
                       </div>
@@ -411,7 +278,7 @@ export default function Sop() {
                         <span className="text-lg leading-none mt-0.5">👤</span>
                         <div>
                           <strong className="block text-slate-800 font-sans uppercase text-[10px] tracking-wider leading-none">Registrasi / Simaksi</strong>
-                          <span className="block font-mono text-[#D4A017] text-base font-extrabold mt-1">07.00 - 17.30 WITA</span>
+                          <span className="block font-mono text-[#D4A017] text-base font-extrabold mt-1">{simaksiHours}</span>
                         </div>
                       </div>
 
@@ -419,7 +286,7 @@ export default function Sop() {
                         <span className="text-lg leading-none mt-0.5">🏔️</span>
                         <div>
                           <strong className="block text-slate-800 font-sans uppercase text-[10px] tracking-wider leading-none">Batas Maksimal Naik</strong>
-                          <span className="block font-mono text-rose-600 text-base font-extrabold mt-1">15.00 WITA</span>
+                          <span className="block font-mono text-rose-600 text-base font-extrabold mt-1">{maxAscentHours}</span>
                         </div>
                       </div>
 
@@ -427,7 +294,7 @@ export default function Sop() {
                         <span className="text-lg leading-none mt-0.5">🚪</span>
                         <div>
                           <strong className="block text-slate-800 font-sans uppercase text-[10px] tracking-wider leading-none">Prosedur Check-Out</strong>
-                          <span className="block text-slate-500 font-sans text-[11px] font-light mt-0.5 leading-relaxed">Wajib Check-Out dan melapor kembali setelah turun dari gunung guna validasi sampah & pendata keselamatan.</span>
+                          <span className="block text-slate-500 font-sans text-[11px] font-light mt-0.5 leading-relaxed">{checkoutDesc}</span>
                         </div>
                       </div>
 
@@ -454,7 +321,7 @@ export default function Sop() {
               <p className="text-[10px] text-slate-500 font-sans mt-1">Slogan mulia pelindung kelestarian sirkuit Gunung Lembah Bontolojong.</p>
             </div>
           </div>
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#D4A017] bg-[#D4A017]/10 px-4 py-2 rounded-full border border-[#D4A017]/15">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#D4A017] bg-[#D4A017]/10 px-4 py-2 rounded-full border border-[#D4A017]/15 leading-none">
             Naik Dengan Tanggung Jawab, Turun Dengan Selamat
           </span>
         </div>

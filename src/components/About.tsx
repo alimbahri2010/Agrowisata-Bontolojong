@@ -1,7 +1,18 @@
 import React from "react";
 import { Footprints, Mountain, Trees, Camera, Tent, Sun, ShieldCheck } from "lucide-react";
+import { SystemSettings } from "../types";
 
-export default function About() {
+interface AboutProps {
+  settings: SystemSettings;
+}
+
+export default function About({ settings }: AboutProps) {
+  const imageUrl = settings.aboutImageUrl || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80";
+  const historyTitle = settings.aboutHistoryTitle || "Kisah Agrowisata Bontolojong";
+  const historyDesc1 = settings.aboutHistoryDesc1 || "Terletak di punggungan bukit pertanian dataran tinggi Gowa, Agrowisata Bontolojong memadukan petualangan pegunungan yang asri dengan warisan budidaya hortikultura lokal. Inisiatif berbasis pemberdayaan masyarakat ini bertekad melindungi kelestarian hutan asli sekaligus menawarkan wisata ramah lingkungan.";
+  const historyDesc2 = settings.aboutHistoryDesc2 || "Ketika Anda menyusuri jalur pendakian atau berkemah di bawah konstelasi bintang, kunjungan Anda langsung mendukung mata pencaharian para ranger pelindung hutan, petani buah lokal, dan masyarakat setempat. Setiap jejak Anda adalah langkah pelestarian bumi.";
+  const missionText = settings.aboutMissionText || "Misi Konservasi Alam: Menanam 10.000 bibit pohon mahoni dan teh di sepanjang punggungan bukit penyangga dalam tiga tahun ke depan, sembari mengedukasi kebijakan zero-waste bagi semua pendaki.";
+
   const highlights = [
     {
       title: "Jalur Pendakian",
@@ -52,9 +63,10 @@ export default function About() {
             <div className="absolute -inset-2 bg-gradient-to-r from-mustard to-tangerine rounded-3xl blur-md opacity-20 group-hover:opacity-30 transition-all duration-300" />
             <div className="relative overflow-hidden rounded-2xl card-shadow aspect-video md:aspect-[4/3] border border-white/40">
               <img
-                src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80"
+                src={imageUrl}
                 alt="Bontolojong Misty Valley Layout"
                 className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                referrerPolicy="no-referrer"
               />
               <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md p-4 rounded-xl border border-orange-100 flex items-center space-x-3 shadow-lg">
                 <div className="p-2.5 bg-emerald-100 rounded-full text-emerald-700">
@@ -76,18 +88,18 @@ export default function About() {
               </span>
             </div>
             <h2 className="text-4xl sm:text-5xl font-display text-charcoal leading-none uppercase mb-6">
-              Kisah Agrowisata Bontolojong
+              {historyTitle}
             </h2>
             <p className="text-charcoal/80 font-sans text-base leading-relaxed mb-5 font-light">
-              Terletak di punggungan bukit pertanian dataran tinggi Gowa, **Agrowisata Bontolojong** memadukan petualangan pegunungan yang asri dengan warisan budidaya hortikultura lokal. Inisiatif berbasis pemberdayaan masyarakat ini bertekad melindungi kelestarian hutan asli sekaligus menawarkan wisata ramah lingkungan.
+              {historyDesc1}
             </p>
             <p className="text-charcoal/80 font-sans text-base leading-relaxed mb-6 font-light">
-              Ketika Anda menyusuri jalur pendakian atau berkemah di bawah konstelasi bintang, kunjungan Anda langsung mendukung mata pencaharian para ranger pelindung hutan, petani buah lokal, dan masyarakat setempat. Setiap jejak Anda adalah langkah pelestarian bumi.
+              {historyDesc2}
             </p>
             <div className="flex items-center space-x-4 p-4 rounded-xl bg-white/60 border border-mustard/20 gap-2 shadow-sm">
               <span className="text-4xl">🌿</span>
               <p className="font-sans text-xs text-brown leading-relaxed">
-                <strong>Misi Konservasi Alam:</strong> Menanam 10.000 bibit pohon mahoni dan teh di sepanjang punggungan bukit penyangga dalam tiga tahun ke depan, sembari mengedukasi kebijakan zero-waste bagi semua pendaki.
+                {missionText}
               </p>
             </div>
           </div>
