@@ -83,7 +83,7 @@ export default function Navbar({
           }}
           className="flex items-center space-x-2.5 cursor-pointer group"
         >
-          <div className="w-10 h-10 bg-[#D4A017] rounded-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform overflow-hidden">
+          <div className="w-10 h-10 bg-[#D4A017] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform overflow-hidden">
             {logoImageUrl ? (
               <img
                 src={logoImageUrl}
@@ -162,18 +162,6 @@ export default function Navbar({
         {/* Call to actions */}
         <div className="hidden md:flex items-center space-x-3" id="nav-actions">
           <button
-            onClick={() => setView("login")}
-            className={`font-sans text-xs font-medium px-4 py-2 rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer ${
-              currentView === "login"
-                ? "bg-[#FFF8EF]/80 text-[#7A4E2D]"
-                : "text-slate-600 hover:text-slate-900 bg-transparent"
-            }`}
-          >
-            <ShieldAlert className="w-4 h-4 text-tangerine" />
-            <span>Akses Staf Staf</span>
-          </button>
-
-          <button
             onClick={() => setView("booking")}
             className="px-6 py-2 bg-charcoal text-white text-xs font-bold rounded-full uppercase tracking-widest hover:bg-brown transition-all hover:scale-105 active:scale-95 shadow-md flex items-center gap-1.5 cursor-pointer"
           >
@@ -225,17 +213,6 @@ export default function Navbar({
           )}
 
           <div className="pt-4 border-t border-slate-100 flex flex-col space-y-3">
-            <button
-              onClick={() => {
-                setView("login");
-                setMobileMenuOpen(false);
-              }}
-              className="font-sans text-sm font-medium py-2.5 text-slate-700 hover:text-slate-950 flex items-center space-x-2 cursor-pointer"
-            >
-              <ShieldAlert className="w-4.5 h-4.5 text-tangerine" />
-              <span>Akses Staf Staf</span>
-            </button>
-
             <button
               onClick={() => {
                 setView("booking");
