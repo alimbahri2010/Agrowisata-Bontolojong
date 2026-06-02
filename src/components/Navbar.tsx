@@ -161,13 +161,6 @@ export default function Navbar({
 
         {/* Call to actions */}
         <div className="hidden md:flex items-center space-x-3" id="nav-actions">
-          <button
-            onClick={() => setView("booking")}
-            className="px-6 py-2 bg-charcoal text-white text-xs font-bold rounded-full uppercase tracking-widest hover:bg-brown transition-all hover:scale-105 active:scale-95 shadow-md flex items-center gap-1.5 cursor-pointer"
-          >
-            <Calendar className="w-3.5 h-3.5" />
-            <span>Pesan Petualangan</span>
-          </button>
         </div>
 
         {/* Mobile menu toggle */}
