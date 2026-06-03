@@ -1606,26 +1606,7 @@ export default function AdminDashboard({
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-semibold mb-1">Pilih Simbol Ikon Logo</label>
-                          <select
-                            className="w-full p-2.5 text-xs rounded-xl bg-white border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-sans cursor-pointer"
-                            value={settings.logoShape || "mountain"}
-                            onChange={(e) => setSettings({ ...settings, logoShape: e.target.value })}
-                            disabled={!!settings.logoImageUrl}
-                          >
-                            <option value="mountain">🗻 Gunung Raksasa (Mountain)</option>
-                            <option value="tree">🌲 Hutan Pinus (Trees)</option>
-                            <option value="compass">🧭 Kompas Petualang (Compass)</option>
-                            <option value="sun">☀️ Cahaya Mentari (Sun)</option>
-                            <option value="leaf">🍃 Daun Hortikultura (Leaf)</option>
-                          </select>
-                          {settings.logoImageUrl && (
-                            <p className="text-[9px] text-red-500 mt-1">Nonaktif karena Anda menyetel tautan gambar logo khusus di samping.</p>
-                          )}
-                        </div>
-
+                      <div>
                         <div className="space-y-2">
                           <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Tautan / Unggah Gambar Logo</label>
                           
@@ -1694,18 +1675,7 @@ export default function AdminDashboard({
                             )}
                           </div>
 
-                          {/* Extra text link input for advanced control/direct image links */}
-                          <div className="space-y-1 mt-2 text-left">
-                            <label className="block text-[8px] font-mono text-slate-450 uppercase font-bold">Atau masukkan link URL Gambar:</label>
-                            <input
-                              type="text"
-                              placeholder="https://contoh-link.com/logo.png"
-                              className="w-full p-2 text-[10px] rounded-lg bg-white border border-slate-200 focus:outline-none text-slate-800 font-mono"
-                              value={settings.logoImageUrl || ""}
-                              onChange={(e) => setSettings({ ...settings, logoImageUrl: e.target.value })}
-                            />
-                            <p className="text-[9px] text-slate-400 leading-tight">Mendukung unggahan media langsung maupun tautan URL gambar statis.</p>
-                          </div>
+
                         </div>
                       </div>
                     </div>
@@ -1757,6 +1727,42 @@ export default function AdminDashboard({
                       </div>
                     </div>
 
+                  </div>
+                </div>
+
+                {/* ADMINISTRATIVE CREDENTIALS EDITOR MODULE */}
+                <div className="p-5 bg-gradient-to-br from-cream/10 to-[#FFF8EF]/20 border border-orange-100 rounded-2xl space-y-5">
+                  <div className="flex items-center space-x-2 pb-3 border-b border-orange-100">
+                    <span className="text-lg">🔐</span>
+                    <div>
+                      <h4 className="text-xs font-sans font-black uppercase text-slate-900 font-bold">KREDENSIAL KEAMANAN PORTAL</h4>
+                      <p className="text-[10px] text-slate-500">Ubah nama akun login (username) dan kunci sandi akses (password) administrator utama.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Username Baru</label>
+                      <input
+                        required
+                        type="text"
+                        placeholder="admin"
+                        className="w-full p-2.5 text-xs rounded-xl bg-white border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-bold font-mono"
+                        value={settings.adminUsername || ""}
+                        onChange={(e) => setSettings({ ...settings, adminUsername: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#7A4E2D] uppercase font-bold mb-1">Sandi Sandi Baru (Password)</label>
+                      <input
+                        required
+                        type="text"
+                        placeholder="bontolojong"
+                        className="w-full p-2.5 text-xs rounded-xl bg-white border border-slate-200 focus:outline-none focus:bg-white text-slate-800 font-bold font-mono"
+                        value={settings.adminPassword || ""}
+                        onChange={(e) => setSettings({ ...settings, adminPassword: e.target.value })}
+                      />
+                    </div>
                   </div>
                 </div>
 

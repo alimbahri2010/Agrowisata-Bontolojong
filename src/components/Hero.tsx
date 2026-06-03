@@ -13,8 +13,8 @@ interface HeroProps {
 
 export default function Hero({ logoName, tagline, setView, scrollToSection, settings }: HeroProps) {
   const bgUrl = settings.heroBackgroundUrl || "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80";
-  const estText = settings.heroEstText || "EST. 2024 • SULAWESI SELATAN";
-  const heightMetric = settings.heroHeightMetric || "1.450m";
+  const estText = settings.heroEstText || "EST. 2014 • JENEPONTO • SULAWESI SELATAN";
+  const heightMetric = settings.heroHeightMetric || "2366m";
   const trailsMetric = settings.heroTrailsMetric || "3+ Jalur";
   const conservationMetric = settings.heroConservationMetric || "100%";
 

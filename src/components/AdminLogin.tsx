@@ -4,11 +4,15 @@ import { KeyRound, Mail, AlertCircle, ShieldCheck, CornerDownLeft, Lock } from "
 interface AdminLoginProps {
   onLoginSuccess: (role: string, email: string) => void;
   setView: (view: "landing" | "booking" | "login" | "dashboard") => void;
+  settings?: any;
 }
 
-export default function AdminLogin({ onLoginSuccess, setView }: AdminLoginProps) {
-  const [email, setEmail] = useState("admin@bontolojong.gov");
-  const [password, setPassword] = useState("bontolojong2026");
+export default function AdminLogin({ onLoginSuccess, setView, settings }: AdminLoginProps) {
+  const targetUsername = settings?.adminUsername || "admin";
+  const targetPassword = settings?.adminPassword || "bontolojong";
+
+  const [email, setEmail] = useState(targetUsername);
+  const [password, setPassword] = useState(targetPassword);
   const [selectedRole, setSelectedRole] = useState("Admin");
   const [isForgot, setIsForgot] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -19,10 +23,10 @@ export default function AdminLogin({ onLoginSuccess, setView }: AdminLoginProps)
     setErrorMsg("");
 
     // Simple authentication
-    if (email === "admin@bontolojong.gov" && password === "bontolojong2026") {
+    if (email === targetUsername && password === targetPassword) {
       onLoginSuccess(selectedRole, email);
     } else {
-      setErrorMsg("Kredensial tidak valid. Silakan gunakan: admin@bontolojong.gov / password: bontolojong2026");
+      setErrorMsg(`Kredensial tidak valid. Silakan gunakan: ${targetUsername} / password: ${targetPassword}`);
     }
   };
 
@@ -112,13 +116,13 @@ export default function AdminLogin({ onLoginSuccess, setView }: AdminLoginProps)
           <form onSubmit={handleLogin} className="space-y-4">
             
             <div>
-              <label className="block text-[10px] font-mono text-brown uppercase font-bold mb-1">Email Administrasi</label>
+              <label className="block text-[10px] font-mono text-brown uppercase font-bold mb-1">Username Administrasi</label>
               <div className="relative">
                 <input
                   required
-                  type="email"
+                  type="text"
                   className="w-full text-slate-800 bg-slate-50 border border-slate-200 p-3 pl-10 rounded-xl text-xs font-sans focus:outline-none focus:ring-1 focus:ring-mustard focus:bg-white"
-                  placeholder="admin@bontolojong.gov"
+                  placeholder="admin"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -150,24 +154,13 @@ export default function AdminLogin({ onLoginSuccess, setView }: AdminLoginProps)
               </div>
             </div>
 
-            <div>
-              <label className="block text-[10px] font-mono text-brown uppercase font-bold mb-1 font-semibold">Grup Divisi Kerja</label>
-              <select
-                className="w-full text-slate-800 bg-slate-50 border border-slate-200 p-3 rounded-xl text-xs font-sans focus:outline-none focus:ring-1 focus:ring-mustard focus:bg-white"
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-              >
-                <option value="Admin">Administrator Utama (Siti Rahma)</option>
-                <option value="Lead Ranger">Pemandu/Ranger Utama (Wawan Riadi)</option>
-                <option value="Financial Officer">Audit Portofolio Keuangan</option>
-              </select>
-            </div>
+
 
             {/* Default credentials hint panel */}
             <div className="p-3 bg-amber-50/50 rounded-xl border border-mustard/15 text-[10px] text-brown font-sans leading-relaxed flex items-center space-x-2 select-none">
               <ShieldCheck className="w-4 h-4 text-mustard shrink-0" />
               <p>
-                <strong>Petunjuk Masuk:</strong> Akun default telah terisi otomatis. Kunci: <code>admin@bontolojong.gov</code> + sandi: <code>bontolojong2026</code>.
+                <strong>Petunjuk Masuk:</strong> Akun default telah terisi otomatis. Kunci: <code>{targetUsername}</code> + sandi: <code>{targetPassword}</code>.
               </p>
             </div>
 

@@ -357,7 +357,10 @@ export const initialSystemSettings: SystemSettings = {
   // SOP Info
   sopSimaksiHours: "07.00 - 17.30 WITA",
   sopMaxAscentHours: "15.00 WITA",
-  sopCheckoutDesc: "Wajib Check-Out dan melapor kembali setelah turun dari gunung guna validasi sampah & pendata keselamatan."
+  sopCheckoutDesc: "Wajib Check-Out dan melapor kembali setelah turun dari gunung guna validasi sampah & pendata keselamatan.",
+  // Default Credentials requested
+  adminUsername: "admin",
+  adminPassword: "bontolojong"
 };
 
 export const initialSopGears = [

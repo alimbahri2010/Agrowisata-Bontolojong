@@ -64,7 +64,7 @@ export default function App() {
   const [adminSession, setAdminSession] = useState<{ loggedIn: boolean; role: string; email: string }>({
     loggedIn: false,
     role: "Admin",
-    email: "admin@bontolojong.gov"
+    email: "admin"
   });
 
   // Automatically monitor page scroll to highlight active parts of the page in the transparent navbar
@@ -172,7 +172,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    setAdminSession({ loggedIn: false, role: "Admin", email: "admin@bontolojong.gov" });
+    setAdminSession({ loggedIn: false, role: "Admin", email: settings.adminUsername || "admin" });
     setView("landing");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -286,6 +286,7 @@ export default function App() {
           <AdminLogin
             onLoginSuccess={handleLoginSuccess}
             setView={setView}
+            settings={settings}
           />
         )}
 

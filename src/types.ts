@@ -114,4 +114,7 @@ export interface SystemSettings {
   sopSimaksiHours?: string;
   sopMaxAscentHours?: string;
   sopCheckoutDesc?: string;
+  // Admin credentials settings
+  adminUsername?: string;
+  adminPassword?: string;
 }
