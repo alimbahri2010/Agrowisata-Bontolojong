@@ -99,7 +99,7 @@ export default function Footer({
               </div>
             </div>
 
-            <p className="text-[#FFF8EF]/75 font-sans text-xs leading-relaxed max-w-sm">
+            <p className="text-[#FFF8EF]/75 font-sans text-xs font-normal not-italic leading-relaxed max-w-sm">
               Temukan ladang pertanian hortikultura yang indah serta rute menanjak hutan awan pegunungan tinggi yang masih asri. Kami melestarikan alam tinggi Gowa sekaligus menyuguhkan keindahan petualangan sejati.
             </p>
 
