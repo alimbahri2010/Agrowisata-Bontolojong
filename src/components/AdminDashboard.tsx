@@ -39,8 +39,15 @@ import {
   Trees,
   Leaf,
   Mountain,
-  Upload
+  Upload,
+  Database,
+  RefreshCw,
+  CheckCircle,
+  AlertCircle,
+  Copy,
+  FileCode
 } from "lucide-react";
+import { supabaseManager, getSupabaseConfig, SUPABASE_SQL_SCHEMA } from "../lib/supabase";
 
 interface AdminDashboardProps {
   destinations: Destination[];
@@ -126,6 +133,66 @@ export default function AdminDashboard({
 
   // Print ticket modal holder
   const [printedBooking, setPrintedBooking] = useState<Booking | null>(null);
+
+  // Supabase connection state & handlers
+  const [supabaseUrlInput, setSupabaseUrlInput] = useState(() => localStorage.getItem("bontolojong_supabase_url") || "");
+  const [supabaseKeyInput, setSupabaseKeyInput] = useState(() => localStorage.getItem("bontolojong_supabase_key") || "");
+  const [supabaseStatusMsg, setSupabaseStatusMsg] = useState("");
+  const [showSqlSchema, setShowSqlSchema] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleConnectSupabase = async () => {
+    setSupabaseStatusMsg("Menguji koneksi...");
+    if (!supabaseUrlInput || !supabaseKeyInput) {
+      setSupabaseStatusMsg("Gagal: URL dan Anon Key tidak boleh kosong.");
+      return;
+    }
+    
+    try {
+      localStorage.setItem("bontolojong_supabase_url", supabaseUrlInput);
+      localStorage.setItem("bontolojong_supabase_key", supabaseKeyInput);
+      
+      const success = supabaseManager.reinit();
+      if (success) {
+        try {
+          const dbSettings = await supabaseManager.loadSettings();
+          if (dbSettings) setSettings(dbSettings);
+          
+          const dbDestinations = await supabaseManager.loadDestinations();
+          if (dbDestinations && dbDestinations.length > 0) setDestinations(dbDestinations);
+          
+          const dbTrails = await supabaseManager.loadTrails();
+          if (dbTrails && dbTrails.length > 0) setTrails(dbTrails);
+          
+          const dbBookings = await supabaseManager.loadBookings();
+          if (dbBookings && dbBookings.length > 0) setBookings(dbBookings);
+          
+          setSupabaseStatusMsg("Sukses! Terhubung ke database Supabase dan mengambil data tabel.");
+        } catch (dbErr: any) {
+          setSupabaseStatusMsg(`Terhubung, tetapi tabel belum dibuat di database Anda. Harap jalankan SCRIPT SCHEMA SQL di bawah di SQL Editor Supabase Anda.`);
+        }
+      } else {
+        setSupabaseStatusMsg("Gagal inisialisasi client. Periksa format URL Supabase Anda.");
+      }
+    } catch (err: any) {
+      setSupabaseStatusMsg(`Error koneksi: ${err.message}`);
+    }
+  };
+
+  const handleDisconnectSupabase = () => {
+    localStorage.removeItem("bontolojong_supabase_url");
+    localStorage.removeItem("bontolojong_supabase_key");
+    supabaseManager.reinit();
+    setSupabaseUrlInput("");
+    setSupabaseKeyInput("");
+    setSupabaseStatusMsg("Koneksi Supabase diputus. Sistem kembali menggunakan Penyimpanan Lokal browser.");
+  };
+
+  const handleCopySql = () => {
+    navigator.clipboard.writeText(SUPABASE_SQL_SCHEMA);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
 
   // Logo file upload states & handlers
   const [logoUploadDragActive, setLogoUploadDragActive] = useState(false);
@@ -269,22 +336,64 @@ export default function AdminDashboard({
 
   const activeEventsCount = events.length;
 
-  const handleBookingStatusChange = (id: string, nextStatus: Booking["bookingStatus"]) => {
+  const saveAllSettingsDynamic = async (successMsg: string) => {
+    setNotifications((prev) => [successMsg, ...prev]);
+    if (supabaseManager.isConnected()) {
+      try {
+        await supabaseManager.saveSettings(settings);
+      } catch (err: any) {
+        setNotifications((prev) => [`Gagal sinkron parameter ke Supabase: ${err.message}`, ...prev]);
+      }
+    }
+    alert(successMsg);
+  };
+
+  const handleBookingStatusChange = async (id: string, nextStatus: Booking["bookingStatus"]) => {
+    let updated: Booking | null = null;
     setBookings((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, bookingStatus: nextStatus } : b))
+      prev.map((b) => {
+        if (b.id === id) {
+          updated = { ...b, bookingStatus: nextStatus };
+          return updated;
+        }
+        return b;
+      })
     );
     // Push alert
     setNotifications((prev) => [`Pass ticket update: ${id} status set to ${nextStatus}`, ...prev]);
+
+    if (supabaseManager.isConnected() && updated) {
+      try {
+        await supabaseManager.upsertBooking(updated);
+      } catch (err: any) {
+        setNotifications((prev) => [`Gagal simpan status di Supabase: ${err.message}`, ...prev]);
+      }
+    }
   };
 
-  const handleBookingPaymentChange = (id: string, nextPayment: Booking["paymentStatus"]) => {
+  const handleBookingPaymentChange = async (id: string, nextPayment: Booking["paymentStatus"]) => {
+    let updated: Booking | null = null;
     setBookings((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, paymentStatus: nextPayment } : b))
+      prev.map((b) => {
+        if (b.id === id) {
+          updated = { ...b, paymentStatus: nextPayment };
+          return updated;
+        }
+        return b;
+      })
     );
+
+    if (supabaseManager.isConnected() && updated) {
+      try {
+        await supabaseManager.upsertBooking(updated);
+      } catch (err: any) {
+        setNotifications((prev) => [`Gagal simpan pembayaran di Supabase: ${err.message}`, ...prev]);
+      }
+    }
   };
 
   // Create Handlers
-  const handleAddDestination = (e: React.FormEvent) => {
+  const handleAddDestination = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDest.title || !newDest.description) return;
     const item: Destination = {
@@ -292,6 +401,15 @@ export default function AdminDashboard({
       id: "dest-" + Date.now()
     };
     setDestinations((prev) => [item, ...prev]);
+
+    if (supabaseManager.isConnected()) {
+      try {
+        await supabaseManager.upsertDestination(item);
+      } catch (err: any) {
+        setNotifications((prev) => [`Supabase error: ${err.message}`, ...prev]);
+      }
+    }
+
     setNewDest({
       title: "",
       description: "",
@@ -304,7 +422,7 @@ export default function AdminDashboard({
     });
   };
 
-  const handleAddTrail = (e: React.FormEvent) => {
+  const handleAddTrail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTrail.name || !newTrail.description) return;
     const item: HikingTrail = {
@@ -312,6 +430,15 @@ export default function AdminDashboard({
       id: "trail-" + Date.now()
     };
     setTrails((prev) => [...prev, item]);
+
+    if (supabaseManager.isConnected()) {
+      try {
+        await supabaseManager.upsertTrail(item);
+      } catch (err: any) {
+        setNotifications((prev) => [`Supabase error: ${err.message}`, ...prev]);
+      }
+    }
+
     setNewTrail({
       name: "",
       difficulty: "Intermediate",
@@ -326,7 +453,7 @@ export default function AdminDashboard({
     });
   };
 
-  const handleAddEvent = (e: React.FormEvent) => {
+  const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEvent.title || !newEvent.description) return;
     const item: TrailEvent = {
@@ -335,6 +462,15 @@ export default function AdminDashboard({
       registeredCount: 0
     };
     setEvents((prev) => [...prev, item]);
+
+    if (supabaseManager.isConnected()) {
+      try {
+        await supabaseManager.upsertEvent(item);
+      } catch (err: any) {
+        setNotifications((prev) => [`Supabase error: ${err.message}`, ...prev]);
+      }
+    }
+
     setNewEvent({
       title: "",
       description: "",
@@ -347,7 +483,7 @@ export default function AdminDashboard({
     });
   };
 
-  const handleAddMedia = (e: React.FormEvent) => {
+  const handleAddMedia = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMedia.title) return;
     const item: GalleryMedia = {
@@ -355,6 +491,15 @@ export default function AdminDashboard({
       id: "gal-" + Date.now()
     };
     setGallery((prev) => [item, ...prev]);
+
+    if (supabaseManager.isConnected()) {
+      try {
+        await supabaseManager.upsertGallery(item);
+      } catch (err: any) {
+        setNotifications((prev) => [`Supabase error: ${err.message}`, ...prev]);
+      }
+    }
+
     setNewMedia({
       title: "",
       category: "Nature",
@@ -362,7 +507,7 @@ export default function AdminDashboard({
     });
   };
 
-  const handleAddStaff = (e: React.FormEvent) => {
+  const handleAddStaff = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newStaff.name || !newStaff.phone) return;
     const item: StaffMember = {
@@ -370,6 +515,15 @@ export default function AdminDashboard({
       id: "staff-" + Date.now()
     };
     setStaff((prev) => [...prev, item]);
+
+    if (supabaseManager.isConnected()) {
+      try {
+        await supabaseManager.upsertStaff(item);
+      } catch (err: any) {
+        setNotifications((prev) => [`Supabase error: ${err.message}`, ...prev]);
+      }
+    }
+
     setNewStaff({
       name: "",
       role: "Junior Guide",
@@ -424,24 +578,59 @@ export default function AdminDashboard({
   // Active sub-section for SOP management panel
   const [sopEditorSubSection, setSopEditorSubSection] = useState<"hours" | "gears" | "general" | "waste" | "ethics" | "penalties">("hours");
 
-  const handleDeleteDest = (id: string) => {
+  const handleDeleteDest = async (id: string) => {
     setDestinations((prev) => prev.filter((d) => d.id !== id));
+    if (supabaseManager.isConnected()) {
+      try {
+        await supabaseManager.deleteDestination(id);
+      } catch (err: any) {
+        setNotifications((prev) => [`Supabase error: ${err.message}`, ...prev]);
+      }
+    }
   };
 
-  const handleDeleteTrail = (id: string) => {
+  const handleDeleteTrail = async (id: string) => {
     setTrails((prev) => prev.filter((t) => t.id !== id));
+    if (supabaseManager.isConnected()) {
+      try {
+        await supabaseManager.deleteTrail(id);
+      } catch (err: any) {
+        setNotifications((prev) => [`Supabase error: ${err.message}`, ...prev]);
+      }
+    }
   };
 
-  const handleDeleteEvent = (id: string) => {
+  const handleDeleteEvent = async (id: string) => {
     setEvents((prev) => prev.filter((e) => e.id !== id));
+    if (supabaseManager.isConnected()) {
+      try {
+        await supabaseManager.deleteEvent(id);
+      } catch (err: any) {
+        setNotifications((prev) => [`Supabase error: ${err.message}`, ...prev]);
+      }
+    }
   };
 
-  const handleDeleteMedia = (id: string) => {
+  const handleDeleteMedia = async (id: string) => {
     setGallery((prev) => prev.filter((m) => m.id !== id));
+    if (supabaseManager.isConnected()) {
+      try {
+        await supabaseManager.deleteGallery(id);
+      } catch (err: any) {
+        setNotifications((prev) => [`Supabase error: ${err.message}`, ...prev]);
+      }
+    }
   };
 
-  const handleDeleteStaff = (id: string) => {
+  const handleDeleteStaff = async (id: string) => {
     setStaff((prev) => prev.filter((s) => s.id !== id));
+    if (supabaseManager.isConnected()) {
+      try {
+        await supabaseManager.deleteStaff(id);
+      } catch (err: any) {
+        setNotifications((prev) => [`Supabase error: ${err.message}`, ...prev]);
+      }
+    }
   };
 
   return (
@@ -1569,6 +1758,122 @@ export default function AdminDashboard({
                   <p className="text-xs text-slate-500 mt-1">Configure global pricing thresholds and metadata changes occurring live on the website.</p>
                 </div>
 
+                {/* INTERACTIVE SUPABASE CONNECTOR PANEL */}
+                <div id="supabase-datastore-connection" className="p-5 bg-slate-900 text-slate-100 border border-slate-800 rounded-2xl space-y-5">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                    <div className="flex items-center space-x-2">
+                      <Database className="w-5 h-5 text-emerald-400 animate-pulse" />
+                      <div>
+                        <h4 className="text-xs font-mono font-black uppercase tracking-wider text-emerald-400">SUPABASE DATABASE DATALINK</h4>
+                        <p className="text-[10px] text-slate-400">Sinkronisasi data (gambar, formulir, testimoni, parameter) secara realtime otomatis.</p>
+                      </div>
+                    </div>
+                    <div>
+                      <span className={`px-2.5 py-1 text-[9px] font-mono font-extrabold uppercase rounded-lg tracking-wider ${
+                        supabaseManager.isConnected() 
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
+                          : "bg-slate-800 text-slate-400 border border-slate-700"
+                      }`}>
+                        {supabaseManager.isConnected() ? "⬤ CONNECTED (CLOUD)" : "⬤ OFFLINE (LOCAL STORAGE)"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[9px] font-mono text-slate-400 uppercase font-bold mb-1">Supabase API URL</label>
+                      <input
+                        type="text"
+                        placeholder="https://your-project.supabase.co"
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-emerald-500 font-mono"
+                        value={supabaseUrlInput}
+                        onChange={(e) => setSupabaseUrlInput(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-mono text-slate-400 uppercase font-bold mb-1">Supabase Anon Public API Key</label>
+                      <input
+                        type="password"
+                        placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        className="w-full p-2.5 text-xs rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-emerald-500 font-mono"
+                        value={supabaseKeyInput}
+                        onChange={(e) => setSupabaseKeyInput(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {supabaseStatusMsg && (
+                    <div className={`p-3 rounded-xl text-xs flex items-start space-x-2 border ${
+                      supabaseStatusMsg.includes("Sukses")
+                        ? "bg-emerald-950/40 text-emerald-300 border-emerald-900"
+                        : supabaseStatusMsg.includes("Menguji")
+                          ? "bg-blue-950/40 text-blue-300 border-blue-950"
+                          : "bg-amber-950/40 text-amber-300 border-amber-900"
+                    }`}>
+                      {supabaseStatusMsg.includes("Sukses") ? (
+                        <CheckCircle className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 animate-pulse" />
+                      )}
+                      <span className="leading-tight">{supabaseStatusMsg}</span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-2 pt-2 justify-between items-center">
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleConnectSupabase}
+                        className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold uppercase tracking-wider text-[10px] rounded-xl cursor-pointer transition-all flex items-center space-x-1"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        <span>Hubungkan & Sinkron</span>
+                      </button>
+
+                      {supabaseManager.isConnected() && (
+                        <button
+                          type="button"
+                          onClick={handleDisconnectSupabase}
+                          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:text-white font-semibold uppercase tracking-wider text-[10px] rounded-xl cursor-pointer transition-all"
+                        >
+                          Putuskan Koneksi
+                        </button>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowSqlSchema(!showSqlSchema)}
+                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:text-white font-semibold uppercase tracking-wider text-[10px] rounded-xl cursor-pointer transition-all flex items-center space-x-1"
+                    >
+                      <FileCode className="w-3.5 h-3.5" />
+                      <span>{showSqlSchema ? "Sembunyikan SQL Schema" : "Tampilkan SQL Schema"}</span>
+                    </button>
+                  </div>
+
+                  {showSqlSchema && (
+                    <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 animate-slide-up text-left">
+                      <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <span className="text-[10px] font-mono text-amber-400 uppercase font-black">SCRIPT SCHEMA SQL SUPABASE</span>
+                        <button
+                          type="button"
+                          onClick={handleCopySql}
+                          className="flex items-center space-x-1 px-2 py-1 text-[9px] font-mono bg-slate-800 hover:bg-slate-700 text-slate-300 rounded cursor-pointer transition-all font-semibold"
+                        >
+                          <Copy className="w-3 h-3" />
+                          <span>{isCopied ? "Tersalin!" : "Salin SQL"}</span>
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-slate-400 leading-relaxed font-sans">
+                        PENTING: Salin kode SQL di bawah ini dan jalankan di **SQL Editor** Supabase Anda untuk membuat semua tabel yang diperlukan agar sinkronisasi dapat berjalan mulus.
+                      </p>
+                      <pre className="text-slate-300 text-[9px] font-mono overflow-x-auto whitespace-pre p-3 bg-black/40 rounded-lg border border-slate-900 max-h-48 leading-relaxed">
+                        {SUPABASE_SQL_SCHEMA}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+
                 {/* VISUAL LOGO & BRAND IDENTITY EDITOR MODULE */}
                 <div id="visual-logo-identity-editor" className="p-5 bg-gradient-to-br from-cream/10 to-[#FFF8EF]/20 border border-orange-100 rounded-2xl space-y-5">
                   <div className="flex items-center space-x-2 pb-3 border-b border-orange-100">
@@ -1977,8 +2282,7 @@ export default function AdminDashboard({
                   <div className="pt-4 flex justify-end">
                     <button
                       onClick={() => {
-                        setNotifications((prev) => ["Beranda Hero metrics successfully updated!", ...prev]);
-                        alert("Hero Header dan Metrik Beranda berhasil disimpan!");
+                        saveAllSettingsDynamic("Hero Header dan Metrik Beranda berhasil disimpan!");
                       }}
                       className="px-5 py-2.5 bg-[#D4A017] hover:bg-[#F28C28] text-slate-950 hover:text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow cursor-pointer flex items-center space-x-1.5"
                     >
@@ -2092,8 +2396,7 @@ export default function AdminDashboard({
                   <div className="pt-4 flex justify-end">
                     <button
                       onClick={() => {
-                        setNotifications((prev) => ["About page data successfully saved!", ...prev]);
-                        alert("Data deskripsi Tentang Kami berhasil disimpan!");
+                        saveAllSettingsDynamic("Data deskripsi Tentang Kami berhasil disimpan!");
                       }}
                       className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow cursor-pointer flex items-center space-x-1.5"
                     >
@@ -2368,8 +2671,7 @@ export default function AdminDashboard({
                     <div className="pt-2 flex justify-end">
                       <button
                         onClick={() => {
-                          setNotifications((prev) => ["SOP operational checkpoints updated", ...prev]);
-                          alert("Jadwal operasional SOP berhasil disimpan!");
+                          saveAllSettingsDynamic("Jadwal operasional SOP berhasil disimpan!");
                         }}
                         className="px-5 py-2.5 bg-[#D4A017] hover:bg-[#F28C28] text-slate-950 hover:text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all cursor-pointer flex items-center space-x-1"
                       >

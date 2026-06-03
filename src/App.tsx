@@ -32,6 +32,7 @@ import {
   initialSopPenalties
 } from "./data";
 import { Destination, HikingTrail, Booking, TrailEvent, GalleryMedia, Testimonial, StaffMember, WeatherInfo, SystemSettings } from "./types";
+import { supabaseManager } from "./lib/supabase";
 
 export default function App() {
   // Navigation states
@@ -55,6 +56,185 @@ export default function App() {
   const [sopWasteRules, setSopWasteRules] = useState<any[]>(initialSopWasteRules);
   const [sopEthicsRules, setSopEthicsRules] = useState<any[]>(initialSopEthicsRules);
   const [sopPenalties, setSopPenalties] = useState<any[]>(initialSopPenalties);
+
+  // Track if initial load from localStorage and/or Supabase has concluded to prevent premature saving
+  const isFirstLoad = React.useRef(true);
+
+  // Initialize and Synchronize state on Mount
+  useEffect(() => {
+    const loadInitialData = async () => {
+      isFirstLoad.current = true;
+
+      // 1. Load from localStorage cache for instant UI render
+      const cachedDestinations = localStorage.getItem("bt_destinations");
+      const cachedTrails = localStorage.getItem("bt_trails");
+      const cachedBookings = localStorage.getItem("bt_bookings");
+      const cachedEvents = localStorage.getItem("bt_events");
+      const cachedGallery = localStorage.getItem("bt_gallery");
+      const cachedTestimonials = localStorage.getItem("bt_testimonials");
+      const cachedStaff = localStorage.getItem("bt_staff");
+      const cachedSettings = localStorage.getItem("bt_settings");
+
+      // SOP storage
+      const cachedSopGears = localStorage.getItem("bt_sop_gears");
+      const cachedSopGeneral = localStorage.getItem("bt_sop_general");
+      const cachedSopWaste = localStorage.getItem("bt_sop_waste");
+      const cachedSopEthics = localStorage.getItem("bt_sop_ethics");
+      const cachedSopPenalties = localStorage.getItem("bt_sop_penalties");
+
+      if (cachedDestinations) setDestinations(JSON.parse(cachedDestinations));
+      if (cachedTrails) setTrails(JSON.parse(cachedTrails));
+      if (cachedBookings) setBookings(JSON.parse(cachedBookings));
+      if (cachedEvents) setEvents(JSON.parse(cachedEvents));
+      if (cachedGallery) setGallery(JSON.parse(cachedGallery));
+      if (cachedTestimonials) setTestimonials(JSON.parse(cachedTestimonials));
+      if (cachedStaff) setStaff(JSON.parse(cachedStaff));
+      if (cachedSettings) setSettings(JSON.parse(cachedSettings));
+
+      if (cachedSopGears) setSopGears(JSON.parse(cachedSopGears));
+      if (cachedSopGeneral) setSopGeneralRules(JSON.parse(cachedSopGeneral));
+      if (cachedSopWaste) setSopWasteRules(JSON.parse(cachedSopWaste));
+      if (cachedSopEthics) setSopEthicsRules(JSON.parse(cachedSopEthics));
+      if (cachedSopPenalties) setSopPenalties(JSON.parse(cachedSopPenalties));
+
+      // 2. Fetch fresh live data from Supabase DB if a connection exists
+      if (supabaseManager.isConnected()) {
+        try {
+          // System settings
+          const dbSettings = await supabaseManager.loadSettings();
+          if (dbSettings) {
+            setSettings(dbSettings);
+            localStorage.setItem("bt_settings", JSON.stringify(dbSettings));
+          }
+
+          // Destinations list
+          const dbDestinations = await supabaseManager.loadDestinations();
+          if (dbDestinations && dbDestinations.length > 0) {
+            setDestinations(dbDestinations);
+            localStorage.setItem("bt_destinations", JSON.stringify(dbDestinations));
+          }
+
+          // Hiking Trails
+          const dbTrails = await supabaseManager.loadTrails();
+          if (dbTrails && dbTrails.length > 0) {
+            setTrails(dbTrails);
+            localStorage.setItem("bt_trails", JSON.stringify(dbTrails));
+          }
+
+          // Bookings (Real reservations)
+          const dbBookings = await supabaseManager.loadBookings();
+          if (dbBookings && dbBookings.length > 0) {
+            setBookings(dbBookings);
+            localStorage.setItem("bt_bookings", JSON.stringify(dbBookings));
+          }
+
+          // Events
+          const dbEvents = await supabaseManager.loadEvents();
+          if (dbEvents && dbEvents.length > 0) {
+            setEvents(dbEvents);
+            localStorage.setItem("bt_events", JSON.stringify(dbEvents));
+          }
+
+          // Gallery Album
+          const dbGallery = await supabaseManager.loadGallery();
+          if (dbGallery && dbGallery.length > 0) {
+            setGallery(dbGallery);
+            localStorage.setItem("bt_gallery", JSON.stringify(dbGallery));
+          }
+
+          // Testimonials
+          const dbTestimonials = await supabaseManager.loadTestimonials();
+          if (dbTestimonials && dbTestimonials.length > 0) {
+            setTestimonials(dbTestimonials);
+            localStorage.setItem("bt_testimonials", JSON.stringify(dbTestimonials));
+          }
+
+          // Staff Members
+          const dbStaff = await supabaseManager.loadStaff();
+          if (dbStaff && dbStaff.length > 0) {
+            setStaff(dbStaff);
+            localStorage.setItem("bt_staff", JSON.stringify(dbStaff));
+          }
+        } catch (err: any) {
+          console.warn("Sinkron Supabase gagal di awal, mungkin tabel belum terinstal:", err.message);
+        }
+      }
+
+      // Finish startup load
+      setTimeout(() => {
+        isFirstLoad.current = false;
+      }, 500);
+    };
+
+    loadInitialData();
+  }, [currentView]); // Re-evaluate if they trigger settings configurations
+
+  // Synchronous localStorage persistence filters
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    localStorage.setItem("bt_destinations", JSON.stringify(destinations));
+  }, [destinations]);
+
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    localStorage.setItem("bt_trails", JSON.stringify(trails));
+  }, [trails]);
+
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    localStorage.setItem("bt_bookings", JSON.stringify(bookings));
+  }, [bookings]);
+
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    localStorage.setItem("bt_events", JSON.stringify(events));
+  }, [events]);
+
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    localStorage.setItem("bt_gallery", JSON.stringify(gallery));
+  }, [gallery]);
+
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    localStorage.setItem("bt_testimonials", JSON.stringify(testimonials));
+  }, [testimonials]);
+
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    localStorage.setItem("bt_staff", JSON.stringify(staff));
+  }, [staff]);
+
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    localStorage.setItem("bt_settings", JSON.stringify(settings));
+  }, [settings]);
+
+  // SOP persistent states
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    localStorage.setItem("bt_sop_gears", JSON.stringify(sopGears));
+  }, [sopGears]);
+
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    localStorage.setItem("bt_sop_general", JSON.stringify(sopGeneralRules));
+  }, [sopGeneralRules]);
+
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    localStorage.setItem("bt_sop_waste", JSON.stringify(sopWasteRules));
+  }, [sopWasteRules]);
+
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    localStorage.setItem("bt_sop_ethics", JSON.stringify(sopEthicsRules));
+  }, [sopEthicsRules]);
+
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    localStorage.setItem("bt_sop_penalties", JSON.stringify(sopPenalties));
+  }, [sopPenalties]);
 
   // Selector hooks for wizard prefill
   const [preSelectedName, setPreSelectedName] = useState<string>("");
@@ -112,11 +292,12 @@ export default function App() {
   };
 
   // Trigger when joining an event directly
-  const handleJoinEvent = (event: TrailEvent) => {
+  const handleJoinEvent = async (event: TrailEvent) => {
     // If the event has capacity, let's increment it and show success
     if (event.registeredCount < event.capacity) {
+      const updatedEvent = { ...event, registeredCount: event.registeredCount + 1 };
       setEvents((prev) =>
-        prev.map((e) => (e.id === event.id ? { ...e, registeredCount: e.registeredCount + 1 } : e))
+        prev.map((e) => (e.id === event.id ? updatedEvent : e))
       );
       
       // Seed a simulated booking so it is instantly recorded in visitor list & dashboards
@@ -138,6 +319,15 @@ export default function App() {
 
       setBookings((prev) => [eventBooking, ...prev]);
 
+      if (supabaseManager.isConnected()) {
+        try {
+          await supabaseManager.upsertBooking(eventBooking);
+          await supabaseManager.upsertEvent(updatedEvent);
+        } catch (err: any) {
+          console.warn("Gagal sinkron join event ke Supabase:", err.message);
+        }
+      }
+
       alert(`Congratulations! You have successfully registered for the "${event.title}" event. We've allocated ticket pass ${simulatedBookingId} in our admin log database!`);
     } else {
       alert("This event is fully booked.");
@@ -145,7 +335,7 @@ export default function App() {
   };
 
   // Trigger when a user publishes a review from list
-  const handleAddReview = (review: { name: string; role: string; comment: string; rating: number }) => {
+  const handleAddReview = async (review: { name: string; role: string; comment: string; rating: number }) => {
     const item: Testimonial = {
       id: "review-" + Date.now(),
       name: review.name,
@@ -153,15 +343,30 @@ export default function App() {
       avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80",
       rating: review.rating,
       comment: review.comment,
-      date: "2026-05-29"
+      date: new Date().toISOString().split("T")[0]
     };
 
     setTestimonials((prev) => [item, ...prev]);
+
+    if (supabaseManager.isConnected()) {
+      try {
+        await supabaseManager.upsertTestimonial(item);
+      } catch (err: any) {
+        console.warn("Gagal simpan review ke Supabase:", err.message);
+      }
+    }
   };
 
   // Trigger when booking form completes successfully
-  const handleAddBooking = (newBooking: Booking) => {
+  const handleAddBooking = async (newBooking: Booking) => {
     setBookings((prev) => [newBooking, ...prev]);
+    if (supabaseManager.isConnected()) {
+      try {
+        await supabaseManager.upsertBooking(newBooking);
+      } catch (err: any) {
+        console.warn("Gagal simpan booking baru ke Supabase:", err.message);
+      }
+    }
   };
 
   // Administrative login handling
