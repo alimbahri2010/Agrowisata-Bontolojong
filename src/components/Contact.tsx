@@ -114,31 +114,26 @@ export default function Contact() {
               </div>
             </div>
 
-            {/* Styled Geographic Map coordinates mock */}
-            <div className="relative rounded-2xl overflow-hidden shadow-inner border border-slate-200 aspect-[16/10] bg-slate-900 flex flex-col justify-end p-4">
-              {/* Topological Visual styling placeholder */}
-              <div className="absolute inset-0 bg-cover bg-center filter brightness-50 opacity-80" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80')" }}>
-                <div className="absolute inset-0 bg-radial-gradient-to-tr from-emerald-950/60 via-slate-950/80 to-transparent" />
-              </div>
-              
-              <div className="relative z-10 text-white">
-                <div className="flex items-center space-x-2 text-amber-400 font-mono text-[10px] tracking-wider mb-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span>KOORDINAT GPS AKTIF</span>
-                </div>
-                <h4 className="font-display text-base tracking-tight text-white uppercase">PUNCAK TINGGI LEMBAH SAPPAN</h4>
-                <p className="text-[10px] font-mono text-slate-300 mt-0.5">Lintang: 5.2341° S | Bujur: 119.8711° E</p>
-              </div>
+            {/* Peta Interaktif Gowa - Agrowisata Bontolojong */}
+            <div className="relative rounded-3xl overflow-hidden shadow-md border border-slate-200 aspect-[16/10] bg-slate-100 group">
+              <iframe
+                title="Peta Lokasi Agrowisata Bontolojong"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3972.1154625299496!2d119.878077!3d-5.2976079!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dbe76fbfeea2d6b%3A0xe67db0733d7b8861!2sAgrowisata%20Bontolojong!5e0!3m2!1sid!2sid!4v1717418432123!5m2!1sid!2sid"
+                className="w-full h-full border-0 absolute inset-0"
+                allowFullScreen={true}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
 
-              {/* View map action simulating link */}
+              {/* View map action navigating to exact mobile friendly link */}
               <div className="absolute top-4 right-4 z-10">
                 <a
-                  href="https://maps.google.com"
+                  href="https://maps.app.goo.gl/kTN3mzs7zHRgjveU6"
                   target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-1.5 bg-white text-slate-950 hover:bg-cream text-[10px] font-sans font-extrabold uppercase rounded shadow cursor-pointer"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-charcoal text-white hover:bg-mustard hover:text-charcoal text-[10px] font-mono font-black uppercase rounded-xl shadow-lg transition-all flex items-center space-x-1.5"
                 >
-                  Buka di Google Maps
+                  <span>Buka di Google Maps</span>
                 </a>
               </div>
             </div>
